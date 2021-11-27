@@ -1,0 +1,211 @@
+\documentclass[]{article}
+
+%opening
+\title{Road to Reality Problems and Notes}
+\author{Dimitri Papaioannou}
+
+\usepackage{amsmath}
+\usepackage{mathtools}
+
+\begin{document}
+
+\maketitle
+
+
+
+\section*{Chapter 4}
+
+\subsection*{4.1}
+
+[4.1], [4.2], [4.3] is just simple complex algebra.
+
+
+
+\subsection*{4.4}
+Show that
+$$
+1+x^2+x^4+x^6+... = (1-x^2)^{-1}
+$$
+
+\textbf{Solution}
+Assume that the series converges to a function $f(x)$
+Then
+\begin{eqnarray}
+f(x) &= \sum_{n=0}^\infty x^{2n} &\implies \\
+f(x) &= 1 + x^2\sum_{n=0}^\infty x^{2n} &\implies \\
+f(x) &= 1+x^2f(x) &\implies \\
+f(x) &= \frac{1}{1-x^2}
+\end{eqnarray}
+
+
+\subsection*{4.5}
+$(1+x^2)^{-1}$ can be obtained from $(1-x^2)^{-1}$ by the transformation $x \rightarrow ix$
+
+\section*{Chapter 5}
+
+\subsection*{5.1, 5.2}
+Geometrically, addition of complex numbers is vector addition in $R^2$ 
+and multiplication is a combination of scaling and rotation.
+
+In addition, parallelograms degenerate to lines when the two complex numbers are co-linear.
+In other words if for $a+ib$ and $c+id$ we have $a/b = c/d$. Exact inverses degenerate to a point.
+
+Similarly, in multiplication triangles degenerate to lines where the numbers are co-linear.
+
+\subsection*{5.3}
+Show that multiplication in the complex plane preserves shapes and angles with direct computation and without trigonometry.
+
+TODO
+
+\subsection*{5.4}
+This becomes obvious once exponential notation is introduced. Otherwise, it is a boring trigonometry exercise.
+
+\subsection*{5.5}
+Show $e^{(a+b)} = e^a e^b$ using the Taylor series expansion.
+
+\textbf{Solution}
+
+\begin{eqnarray}
+e^{(a+b)} &= \sum_{n=0}^{\infty}\frac{(a+b)^n}{n!}\\
+\label{ea+b}
+&= \sum_{n=0}^{\infty}\sum_{k=0}^n \frac{a^k b^{n-k}}{k!(n-k)!}
+\end{eqnarray}
+
+On the other hand
+
+\begin{equation}
+e^a e^b = \sum_{n=0}^{\infty}\frac{a^n}{n!} \sum_{m=0}^{\infty}\frac{b^m}{m!}
+\end{equation}
+
+Introduce a change of variable by setting $m = n-k$. 
+Then the new variable $k$ ranges from $n$ (when $m=0$) to $0$ (when $m=\infty$).
+
+\begin{eqnarray}
+e^a e^b &= \sum_{n=0}^{\infty}\frac{a^n}{n!} \sum_{k=0}^{n}\frac{b^{n-k}}{(n-k)!}\\
+&= \sum_{n=0}^{\infty}\sum_{k=0}^n \frac{a^k b^{n-k}}{k!(n-k)!}
+\end{eqnarray}
+
+Which produces the same result as in (\ref{ea+b}).
+
+\subsection*{5.6}
+Show that $z+i\pi$ is a logarithm of $-w$.
+
+\textbf{Solution}
+\begin{eqnarray}
+w = e^z \implies log(-w) = log(-e^z) = log(-1)+log(e^z) \\
+= log(e^{i\pi})+z = z + i\pi
+\end{eqnarray}
+
+
+\subsection*{5.8}
+Show 
+$$
+\cos 3\theta = \cos^3 \theta - 3\cos\theta \sin^2 \theta 
+$$
+$$
+\sin 3\theta = 3\sin\theta \cos^2 \theta - \sin^3 \theta
+$$
+\textbf{Solution}
+Expand $e^{3i\theta} = (e^{i\theta})^3$ in real and imaginary parts
+
+\subsection*{5.9}
+I do not understand what the plot is plotting. 
+
+\subsection*{5.10}
+Resolve the paradox: 
+$$
+e = e^{1+2\pi i} = (e^{1+2\pi i})^{1+2\pi i} = e^{1+4\pi i-4\pi^2} = e^{1-4\pi^2}
+$$
+
+\textbf{Solution}
+This is explained by 5.15. Because of the multi-valuedness of the complex power, we cannot willi-nilly conclude that  $w^{ab} = e^{ab \ln w}$.
+
+\subsection*{5.11}
+$$
+z = lob_b z \implies w = b^z \implies lnw = zlnb \implies z = \frac{lnw}{lnb}
+$$
+And since we can add $2ki\pi$ to $lnw$, we can add $2ki\pi/lnb$ to z.
+
+\subsection*{5.12}
+Why is it allowable to specify $logi = \frac{1}{2}\pi i$?
+
+\textbf{Solution} because $i = e^{i\pi/2}$
+
+\subsection*{5.13}
+
+$$
+e^{2\pi n} = e^i \cdot e^{-i2\pi n} = e^i
+$$
+ 
+ 
+\subsection*{5.14}
+Multivaluedness of $w^{1/n}$
+
+\textbf{Idea}
+
+Starting from $z^n = w$ and taking the log of both sides we have
+
+$nlogz = logw+2ik\pi$ where the second term results from the multi-valuedness of log.
+$logz = (1/n)logw + \frac{2ik\pi}{n} = logw^{1/n} + \frac{2ik\pi}{n}$
+
+From which $z e^{\frac{2ik\pi}{n}} = w^{1/n}$
+
+
+\subsection*{5.15}
+Describe the conditions under which $(w^a)^b = w^{ab}$.
+
+\textbf{Solution}
+
+Fix a branch for $logw$. By the definition of complex power, we have for the right hand side: $w^{ab} = e^{ab \ln w}$.
+
+
+For the left hand side we have $(w^a)^b = e^{b \ln w^a}$
+
+For the two sides to much we must specify that $\ln w^a = a \ln w$
+
+\section*{Chapter 6}
+
+\subsection*{6.1}
+Show that the Heaviside function is given by 
+$$
+\theta(x) = \frac{|x|+x}{2x}
+$$
+
+If $x>0$, then $\theta(x) = \frac{x+x}{2x} = 1$.
+
+If $x<0$ then $\theta(x) = \frac{-x+x}{2x} = 0$.
+
+\subsection*{6.2}
+Show that the following function is $C^{\infty}$
+\begin{equation}
+    h(x) =
+    \begin{cases*}
+      0       & if $x \leq 0$ \\
+      e^{-1/x} & if x > 0
+    \end{cases*}
+\end{equation}
+
+\textbf{Sketch}
+On $x>0$, $h(x)$ is a composition of smooth functions, therefore smooth (easy to show from chain rule). So if suffices to show that h is smooth at 0.
+
+Show that all derivatives of h are sums of the form 
+$e^{-1/x} \cdot (1/x)^n$
+
+Do the substitution $u = 1/x$. Then show that each of 
+$e^{-u} \cdot u^n$ goes to 0 as $u \rightarrow \infty$.
+
+\subsection*{6.3}
+Just differentiate the expansion and evaluate at 0
+
+\subsection*{6.4}
+Show that $e^{-1/x^2}$ is smooth but not analytic at 0.
+
+\textbf{Sketch}
+As in 6.2 show that all derivatives are of the form $e^{-1/x^2} \cdot 
+(1/x)^n$ and show that they are all 0 at 0. Then, use an argument as in page 113 to show that if it had a Taylor expansion all coefficients have to vanish so that the function is 0 at 0.
+
+
+[6.5] to [6.10] are calculus review
+
+
+\end{document}
