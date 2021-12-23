@@ -1,0 +1,231 @@
+\documentclass[]{article}
+
+%opening
+\title{Road to Reality\\Chapters 7-8}
+\author{Dimitri Papaioannou}
+
+\usepackage{amsmath}
+\usepackage{mathtools}
+
+\begin{document}
+
+\maketitle
+
+
+\section*{Chapter 7}
+
+Review of complex analysis
+
+\begin{itemize}
+\item If a complex derivative exists then it is continuous. 
+\item If the first derivative exists, then all derivatives exist, and a Taylor expansion exists.
+\item A function with a Taylor expansion is called \textit{analytic}. The definition of analytic goes beyond complex functions to describe functions in other domains that have Taylor expansions. A complex analytic function is also called \textit{holomorphic}.
+\item Write $f(z)= f(x+iy) = u(x,y)+iv(x,y)$. Then u and v are conjugate harmonic and satisfy the Cauchy Riemann equations. (Problem 10.12)
+\end{itemize}
+
+\subsection*{7.1}
+For nonzero n, $z^n$ has an anti-derivative $z^{n+1}/(n+1)$
+Integrated over the unit circle we have $e^{i(n+1)\theta}/(n+1)$
+evaluated at $2\pi$ and $0$, which yields 0. 
+
+\subsection*{7.2}
+Substituting the McLaurin series, all terms other than 1/z integrate to 0 (by 7.1) leaving 
+$$
+\frac{1}{2\pi i} \oint \frac{f(0)}{z}dz = f(0)
+$$
+
+because 
+$$
+\oint \frac{dz}{z} = 2\pi i
+$$
+
+
+\subsection*{7.3}
+Using the following relationship as the "definition" of the derivative of an analytic function
+
+\begin{equation}
+f^{(n)} := \frac{n!}{2\pi i}\oint \frac{f(z)}{z^{n+1}}dz
+\end{equation}
+
+show that the Taylor expansion sums up to $f(x)$:
+\begin{equation}
+\sum_{n=0}^\infty a_n z^n
+\end{equation}
+
+where $a_n = f^{(n)}(0)/n!$.
+
+\textbf{Solution}
+Evaluate the series at $z = p$
+\begin{eqnarray}
+\sum_{n=0}^\infty a_n p^n &= \frac{n!}{2\pi i} \sum \oint \frac{f(z)}{z^{n+1}} p^n dz
+\end{eqnarray}
+I am going to assume without proof that I can interchange integration and summation
+
+\begin{eqnarray}
+\sum_{n=0}^\infty a_n p^n &= 
+\frac{1}{2\pi i} \oint \frac{f(z)}{z} \sum (\frac{p}{z})^n dz \\
+  &= \frac{1}{2\pi i} \oint \frac{f(z)}{z} \frac{z}{z-p} dz \\
+  &= \frac{1}{2\pi i} \oint \frac{f(z)}{z-p}dz\\
+  &= f(p)
+\end{eqnarray}
+where the last step follows from the shifted version of the Cauchy formula.
+
+\subsection*{7.4}
+This amounts to showing that a contour integral can be broken into a sum of contour integrals surrounding each pole. Then the result follows from the Cauchy formula:
+
+$$
+\oint \frac{h(z)}{(z-p)^n} dz = \frac{2\pi i}{(n-1)!} h^{(n-1)}(p)
+$$
+
+\subsection*{7.5}
+Show that $\int_0^{\infty} x^{-1}sin(x)dx = \pi/2$ \\
+
+\textbf{Solution}:
+Following the hint, I will integrate the function  $z^{-1}e^{iz}$ along the suggested path.
+
+The function has a pole at 0 and the value of the residue there is 1.
+
+Therefore we have 
+
+\begin{eqnarray}
+\int_{-R}^{-\epsilon}\frac{e^{ix}}{x}dx +\int_{\epsilon-semicircle } \frac{e^{iz}}{z}dz +\\
+\int_{\epsilon}^R\frac{e^{ix}}{x}dx +\int_{R-semicircle } \frac{e^{iz}}{z}dz &= 0
+\end{eqnarray}
+%\int_{-R}^{R}\frac{cos(x)}{x-a}dx +i\int_{-R}^{R}\frac{sin(x)}{x-a}dx +\int_{semicircle} \frac{e^{iz}}{z-a}dz &= 2\pi ie^{-a}
+
+
+First we need to show that the integral over the R-semicircle goes to 0 as R goes to infinity. This can be shown by direct calculation that shows the anti-derivative of 
+$e^{iRe^{i\theta}}$ is a bounded function divided by R (TODO: supply details)
+ 
+The integral over the $\epsilon$ semicircle is half of the integral around the pole (going around clockwise), so it evaluates to $-i*pi$
+
+Therefore we have:
+\begin{equation}
+\int_{-R}^{-\epsilon}\frac{e^{ix}}{x}dx + \int_{\epsilon}^R\frac{e^{ix}}{x}dx = i\pi
+\end{equation}
+
+Now we have $frac{e^{ix}}{x} = \frac{cos(x)}{x} + i\frac{sin(x)}{x}$.
+
+The first function is anti-symmetric, so the two opposite integrals cancel each other.
+The other function is symmetric so the two integrals are the same. Putting this together we get:
+
+\begin{equation}
+2i\int_{0}^{\infty}\frac{sin(x)}{x}dx = i\pi
+\end{equation}
+
+
+
+\subsection*{7.6}
+Sow that $\sum_{n=0}^\infty \frac{1}{n^2} = \frac{\pi^2}{6}$
+
+\textbf{Solution}: TODO
+
+\subsection*{7.7}
+What is the power series for $1/z$ around p
+
+\textbf{Solution}
+$$\sum_{n=0}^\infty (-1)^n p ^{-(n+1)} (z-p)^n$$
+
+\subsection*{7.8}
+Derive the power series for $lnz$ around 1
+
+\textbf{Solution}: 
+$dlogz/dz = 1/z$. Subsequent powers of $1/z$ yield $(-1)^{n-1} \frac{z^{n}}{n}$.
+All these evaluated at $z = 1$ yield the coefficients $(-1)^{n-1}\frac{1}{n}$.
+
+\section*{Chapter 8}
+
+\subsection*{8.1}
+Show that the Riemann surface $z^a$ joins back after $n$ turns when $a = m/n$ is rational.
+
+\textbf{Solution?}
+ $z^a$  has a branch point at 0. If  $a = m/n$ then
+ $(z^{a})^{kn} = z^{km}$ which is analytic on the whole complex plane. 
+ 
+\subsection*{8.2}
+Figure out the topology of the Riemann surface $(1-z^4)^{1/2}$
+
+\textbf{TODO}
+
+\subsection*{8.3}
+The Riemann surface for $logz$ is topologically equivalent to the Riemann sphere with 
+a single missing point. The missing point can be unambiguously replaced to yield the entire sphere. Can you see how this comes about?
+
+Hint: Think of the Riemann sphere of the variable $w = logz$.
+
+\textbf{TODO}
+
+\subsection*{8.4}
+Show that $z \rightarrow z^{-1}$ maps circles to circles.
+
+\textbf{Solution}
+Consider a circle of radius 1 centered at the real number $r$. This circle is given
+by $r+e^{i\theta}$.
+We can generalize to any radius and any offset by simply multiplying with a complex number $c$ thus causing a rotation and scaling. 
+
+The conformal mapping $z^{-1}$ sends this circle to $\frac{1}{r+e^{i\theta}}$.
+
+After a lot of manipulations we find that this expression is equivalent to the circle given by
+$$\frac{r}{r^2-1}+\frac{e^{-i\theta}}{r^2-1}$$
+
+\subsection*{8.5}
+Verify that any Mobius transformation can be obtained by a sequence of linear $\rightarrow$ inversion $\rightarrow$ linear transformations.
+
+\textbf{Solution}
+Straightforward
+
+\subsection*{8.6}
+Check that the two stereographic projections from the north and south poles are related by the transformation $z \rightarrow 1/z$.
+
+\textbf{Solution}
+It suffices to show it on a 2D circle. The result can be extended to the whole sphere by a rotation.
+
+Fix a point $\bar{x}$ on the real line.  
+The line connecting it to the north pole of the sphere (circle) is given by the equation $y = \frac{-1}{\bar{x}} +1$.
+The circle equation is $x^2+y^2 = 1$.
+Solving this system we obtain the point on the circle corresponding to $\bar{x}$:
+
+\begin{equation}
+x^* = \frac{2\bar{x}}{\bar{x}^2+1}
+\end{equation}
+
+
+\begin{equation}
+y^* = \frac{\bar{x}^2-1}{\bar{x}^2+1}
+\end{equation}
+
+The antipodal point on the southern hemisphere is given by 
+$(x^*, -y^*)$.
+
+We seek the line that connects this point to the northern hemisphere and where it intersects the real line.
+
+We can easily compute the slope of this line to be 
+$-\bar{x}$ and the intercept 1. The line intersects the real axis at $0 = -\bar{x}*x + 1$.
+Solving for x we get $x = \frac{1}{\bar{x}}$ which is the desired result.
+
+
+\subsection*{8.7}
+Show that the transformation 
+$$
+t = \frac{z-1}{iz+i}
+$$
+sends lines parallel to the x-axis to circles in the t-plane.
+
+\textbf{Solution}
+TODO: Note that this is the same transform as in  9.5
+
+
+
+\subsection*{8.8}
+Form a parallelogram on the complex plane by connecting the points (0,1,p,1+p). Then identify opposite edges to form a torus. For different values of p, all such surfaces are topologically equivalent, but may not be \textit{holomorphically} equivalent, in the sense that no holomorhpic mapping can be constructed from one to another.
+
+This question is asking to verify that certain transformations of p, such as 1+p, -p, 1/p, yield holomorphically equivalent surfaces. Furthermore, it asks to find all the special values of p that lead to additional discrete symmetries of the Riemann surface.
+
+\textbf{Discussion of possible Solution}
+
+Must construct a holomorphic mapping (Mobius?) that maps one torus to another. It is not clear to me how to define these mappings along the identified edges. 
+
+For the second part, I suspect choosing p such that the result is a square or a line would lead to additional symmetries, whatever this is supposed to mean.
+
+
+\end{document}
