@@ -1,0 +1,85 @@
+\documentclass[]{article}
+
+%opening
+\title{Road to Reality Chapter 9 Problems}
+\author{Dimitri Papaioannou}
+
+\usepackage{amsmath}
+\usepackage{mathtools}
+
+\begin{document}
+
+\maketitle
+
+
+\section*{Chapter 9}
+
+The culmination of this chapter is that Fourier series are Laurent series restricted on the unit circle. The somewhat miraculous implication is that functions that have Fourier expansions are in some sense restrictions of holomorphic function on the circle. 
+
+By extension, thinking of a line as a circle of infinite length, 
+the Fourier transform is obtained by the restriction of a holomorphic function on the real line. 
+
+
+
+\subsection*{9.1}
+Solve by direct substitution
+
+\subsection*{9.2}
+If F is analytic on the unit circle, show that the Fourier coefficients are given by 
+\begin{equation}
+a_n = \frac{1}{2i\pi}\oint z^{-n-1}F(z)dz 
+\end{equation}
+
+
+\textbf{Solution}
+Using the Laurent series expansion for F:
+\begin{equation}
+\oint z^{-n-1}F(z)dz = \sum_{k\neq n}\oint z^{k-n-1}dz + a_n \oint dz/z
+\end{equation}
+
+The last integral computes to $2i\pi$. 
+For the others, we have 
+$$
+\oint \frac{f(z)}{z^{n+1}}dz = 2i\pi f^{(n)}(0)/n!
+$$
+where $f(z) = 1$, so they all evaluate to 0
+
+
+\subsection*{9.3}
+$F^-(z)$ has a Taylor series so it determines an entire function on the extended Complex plane (i.e. Riemann sphere).
+The same is true for $F^+(z^{-1})$ which is the composition of $F^+$ with the hemisphere mapping $w = z^{-1}$.
+
+\subsection*{9.4}
+Which are the holomorphic mappings of the Riemann sphere that map each hemisphere to itself but do not preserve the north or south poles.
+
+\textbf{Solution}(partial)
+
+The Transformation $z = \frac{-t+i}{t+i}$ appears to do the trick, since it is unimodular and does not preserve the poles. 
+
+\subsection*{9.5}
+Show that $t = tan\frac{1}{2}x$ and $t = \frac{z-1}{iz+i}$ are the same transformation
+on the unit circle $z = e^{ix}$
+
+\textbf{Solution}
+\begin{eqnarray}
+t = \frac{z-1}{iz+i} &= -i\frac{e^{ix}-1}{e^{ix}+1} &= \\
+-i\frac{e^{ix}-e^{-ix}}{2+e^{ix}+e^{-ix}} &= \frac{sinx}{1+cosx} &= \\
+tan(x/2)
+\end{eqnarray}
+
+\subsection*{9.6}
+Fourier Transform:
+
+$$
+f(x) = \frac{1}{2\pi} \int\limits_{-\infty}^{infty} g(p)e^{ixp}dp,
+g(p) = \frac{1}{2\pi} \int\limits_{-\infty}^{infty} f(x)e^{-xp}dx
+$$
+
+Outline how to obtain $g(p)$ in terms of $f(x)$ using the result of exercise 9.2: 
+$a_n = \frac{1}{2i\pi}\oint z^{-n-1}F(z)dz$
+
+\subsection*{9.8}
+Derive the Fourier coefficients of the square wave. 
+
+
+\end{document}
