@@ -81,5 +81,52 @@ $a_n = \frac{1}{2i\pi}\oint z^{-n-1}F(z)dz$
 \subsection*{9.8}
 Derive the Fourier coefficients of the square wave. 
 
+\subsection*{9.9}
+From section 7.4
+
+$$
+logz = \sum_{k=1}^{\infty} \frac{(-1)^{k-1}}{k}(z-1)^k
+$$
+
+replacing z with z+1 we get
+
+$$
+log(z-1) = \sum_{k=1}^{\infty} \frac{(-1)^{k-1}}{k}z^k
+$$
+
+replacing z with 1-z we get 
+
+$$
+log(z-1) = \sum_{k=1}^{\infty} \frac{(-1)^{k-1}}{k}(-z)^k = 
+\sum_{k=1}^{\infty} \frac{(-1)^{k-1}}{k}z^k 
+= - \sum_{k=1}^{\infty} \frac{z^k}{k}
+$$
+
+Now we observe that 
+
+$$
+log\frac{z+1}{z-1} = log{z+1}-log{z-1} =  
+\sum_{k=1}^{\infty} \frac{(-1)^{k-1}}{k}z^k - \sum_{k=1}^{\infty} \frac{z^k}{k}
+$$
+
+whereas the even terms cancel and the odd terms are doubled, therefore:
+
+$$
+\frac{1}{2}log\frac{z+1}{z-1} = \sum_{odd} \frac{z^k}{k}
+$$
+
+The expression for $S^+$ follows by replacing z with $z^{-1}$.
+
+\subsection*{9.10}
+
+\begin{eqnarray}
+log\frac{1+z}{1-z} - log\frac{1+z^{-1}}{1-z^{-1}} &= \\
+log\frac{1+z}{1-z} - log\frac{(z+1)/z}{(z-1)/z} &= \\
+log\frac{1+z}{1-z} - log\frac{z+1}{z-1} &= \\
+log\frac{(1+z)(z-1)}{(1-z))(1+z)} &= \\
+log(-1) = \pm i\pi
+\end{eqnarray}
+assuming the principal branch of the logarithm.
+It follows, that $2is(x) = i\pi/2 \rightarrow s(x) = \pm \pi/4$
 
 \end{document}
