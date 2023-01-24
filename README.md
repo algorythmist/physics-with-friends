@@ -1,14 +1,10 @@
-# Road to Reality
+# Physics and Friends
 
-This project contains solution to problems from the book "Road to Reality" 
-by Roger Penrose.
+This project contains problem solutions, notes, and presentations from the Meetup 
+"Physics with Friends".
 
-The solutions are either in pure latex of jupyter notebook format. 
-In some cases, the jupyter notebooks contain graphics.
-
-I will be adding chapters as I go through the problems. 
-Sometimes I go back and fill in details for past chapters. 
-In general, if a problem is missing is either because I found it too easy or too hard.
+The solutions can be in pure latex, jupyter notebook format, pdf, matlab 
+or any other format.
 
 ---
 

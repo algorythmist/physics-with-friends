@@ -1,3 +1,4 @@
+einsteinpy
 jupyter
 matplotlib
 numpy
