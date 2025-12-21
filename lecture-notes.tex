@@ -1,0 +1,188 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{tikz-cd}
+\usepackage{enumitem}
+
+% Theorem environments
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+
+\title{Talk 2: Equivalence Relations and Quotienting Vector Spaces}
+\author{Lecture Notes}
+\date{September 11, 2025}
+
+\begin{document}
+
+\maketitle
+
+\section{Equivalence Relations}
+
+\begin{definition}[Equivalence Relation]
+Let $X$ be a set. An \textbf{equivalence relation} on $X$ is a binary relation $\sim$ on $X$ that satisfies:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Reflexivity:} $x \sim x$ for all $x \in X$
+    \item \textbf{Symmetry:} If $x \sim y$, then $y \sim x$
+    \item \textbf{Transitivity:} If $x \sim y$ and $y \sim z$, then $x \sim z$
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[Equivalence Class]
+Given an equivalence relation $\sim$ on $X$ and an element $x \in X$, the \textbf{equivalence class} of $x$ is:
+\[[x] = \{y \in X : y \sim x\}\]
+\end{definition}
+
+\begin{definition}[Quotient Set]
+The \textbf{quotient set} (or \textbf{quotient space}) of $X$ by $\sim$ is:
+\[X/\!\sim \, = \{[x] : x \in X\}\]
+the set of all equivalence classes.
+\end{definition}
+
+\subsection*{Examples}
+
+\begin{example}
+Let $X = \mathbb{Z}$ and define $a \sim b$ if $a - b$ is even. This is an equivalence relation:
+\begin{itemize}
+    \item Reflexive: $a - a = 0$ is even
+    \item Symmetric: If $a - b$ is even, then $b - a = -(a-b)$ is even
+    \item Transitive: If $a - b$ and $b - c$ are even, then $a - c = (a-b) + (b-c)$ is even
+\end{itemize}
+The equivalence classes are $[0] = \{\ldots, -4, -2, 0, 2, 4, \ldots\}$ (even integers) and $[1] = \{\ldots, -3, -1, 1, 3, 5, \ldots\}$ (odd integers). Thus $\mathbb{Z}/\!\sim \, = \{[0], [1]\} \cong \mathbb{Z}_2$.
+\end{example}
+
+\begin{example}[Modular Arithmetic]
+For $n \in \mathbb{N}$, define $a \sim b$ if $n \mid (a-b)$ (i.e., $a \equiv b \pmod{n}$). This gives $\mathbb{Z}/n\mathbb{Z} = \{[0], [1], \ldots, [n-1]\}$.
+\end{example}
+
+\begin{example}
+Let $X = \mathbb{R}^2 \setminus \{(0,0)\}$ and define $(x_1, y_1) \sim (x_2, y_2)$ if there exists $\lambda \in \mathbb{R} \setminus \{0\}$ such that $(x_2, y_2) = (\lambda x_1, \lambda y_1)$. The equivalence classes are lines through the origin (minus the origin itself). The quotient space $\mathbb{R}^2\setminus\{(0,0)\}/\!\sim$ is the \textbf{real projective line} $\mathbb{RP}^1$.
+\end{example}
+
+\section{Quotient Vector Spaces}
+
+\subsection*{Setup}
+Let $V$ be a vector space over a field $\mathbb{F}$ and let $W \subseteq V$ be a subspace.
+
+\begin{definition}[Coset]
+For $v \in V$, the \textbf{coset} of $W$ containing $v$ is:
+\[v + W = \{v + w : w \in W\}\]
+\end{definition}
+
+\textbf{Key observation:} Define $v_1 \sim v_2$ if $v_1 - v_2 \in W$. This is an equivalence relation, and the equivalence class of $v$ is exactly $v + W$.
+
+\begin{definition}[Quotient Vector Space]
+The \textbf{quotient vector space} $V/W$ is the set of all cosets:
+\[V/W = \{v + W : v \in V\}\]
+with operations:
+\begin{align*}
+(v_1 + W) + (v_2 + W) &= (v_1 + v_2) + W \\
+c(v + W) &= (cv) + W \quad \text{for } c \in \mathbb{F}
+\end{align*}
+\end{definition}
+
+\textbf{Well-definedness:} These operations are well-defined because if $v_1 + W = v_1' + W$ and $v_2 + W = v_2' + W$, then $v_1 - v_1' \in W$ and $v_2 - v_2' \in W$, so $(v_1 + v_2) - (v_1' + v_2') = (v_1 - v_1') + (v_2 - v_2') \in W$.
+
+\begin{theorem}[Dimension Formula]
+If $V$ is finite-dimensional, then:
+\[\dim(V/W) = \dim(V) - \dim(W)\]
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+Choose a basis $\{w_1, \ldots, w_k\}$ of $W$ and extend it to a basis $\{w_1, \ldots, w_k, v_1, \ldots, v_m\}$ of $V$. Then $\{v_1 + W, \ldots, v_m + W\}$ is a basis for $V/W$.
+\end{proof}
+
+\subsection*{Examples}
+
+\begin{example}
+Let $V = \mathbb{R}^3$ and $W = \{(x, y, 0) : x, y \in \mathbb{R}\}$ (the $xy$-plane). Then:
+\begin{itemize}
+    \item Each coset has the form $(0, 0, z) + W$ for $z \in \mathbb{R}$
+    \item These are planes parallel to the $xy$-plane
+    \item $\dim(V/W) = 3 - 2 = 1$
+    \item $V/W \cong \mathbb{R}$ (isomorphic as vector spaces)
+\end{itemize}
+\end{example}
+
+\begin{example}
+Let $V = \mathbb{R}[x]$ (polynomials) and $W = \{p \in \mathbb{R}[x] : p(0) = 0\}$. Then $W = \langle x \rangle$ (polynomials divisible by $x$), and:
+\[V/W \cong \mathbb{R}\]
+via the isomorphism $[p] \mapsto p(0)$ (evaluation at 0).
+\end{example}
+
+\begin{example}
+Let $V = C([0,1])$ (continuous functions on $[0,1]$) and $W = \{f : f(1/2) = 0\}$. Then:
+\[V/W \cong \mathbb{R}\]
+via the map $[f] \mapsto f(1/2)$.
+\end{example}
+
+\section{The First Isomorphism Theorem}
+
+\begin{theorem}[First Isomorphism Theorem for Vector Spaces]
+Let $T: V \to U$ be a linear map. Then:
+\[V/\ker(T) \cong \operatorname{im}(T)\]
+The isomorphism is given by $\bar{T}: V/\ker(T) \to \operatorname{im}(T)$ where $\bar{T}(v + \ker(T)) = T(v)$.
+\end{theorem}
+
+\begin{proof}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Well-defined:} If $v + \ker(T) = v' + \ker(T)$, then $v - v' \in \ker(T)$, so $T(v) = T(v')$.
+    \item \textbf{Linear:} $\bar{T}((v_1 + \ker(T)) + (v_2 + \ker(T))) = \bar{T}((v_1+v_2) + \ker(T)) = T(v_1+v_2) = T(v_1) + T(v_2)$.
+    \item \textbf{Injective:} If $\bar{T}(v + \ker(T)) = 0$, then $T(v) = 0$, so $v \in \ker(T)$, thus $v + \ker(T)$ is the zero element of $V/\ker(T)$.
+    \item \textbf{Surjective:} For any $u \in \operatorname{im}(T)$, there exists $v \in V$ with $T(v) = u$, so $\bar{T}(v + \ker(T)) = u$.
+\end{enumerate}
+\end{proof}
+
+\begin{corollary}[Rank-Nullity Theorem]
+For a linear map $T: V \to U$ where $V$ is finite-dimensional:
+\[\dim(V) = \dim(\ker(T)) + \dim(\operatorname{im}(T))\]
+\end{corollary}
+
+\begin{proof}
+By the First Isomorphism Theorem, $\dim(\operatorname{im}(T)) = \dim(V/\ker(T)) = \dim(V) - \dim(\ker(T))$.
+\end{proof}
+
+\section{Canonical Projection}
+
+\begin{definition}
+The \textbf{canonical projection} (or \textbf{quotient map}) is:
+\[\pi: V \to V/W, \quad \pi(v) = v + W\]
+\end{definition}
+
+\textbf{Properties:}
+\begin{itemize}
+    \item $\pi$ is linear
+    \item $\pi$ is surjective
+    \item $\ker(\pi) = W$
+    \item By the First Isomorphism Theorem: $V/\ker(\pi) = V/W \cong \operatorname{im}(\pi) = V/W$
+\end{itemize}
+
+\section{Universal Property of Quotients}
+
+\begin{theorem}[Universal Property]
+Let $V, U$ be vector spaces, $W \subseteq V$ a subspace, and $\pi: V \to V/W$ the canonical projection. For any linear map $T: V \to U$ with $W \subseteq \ker(T)$, there exists a unique linear map $\bar{T}: V/W \to U$ such that $T = \bar{T} \circ \pi$.
+
+\begin{center}
+\begin{tikzcd}[ampersand replacement=\&]
+V \arrow[r, "T"] \arrow[d, "\pi"'] \& U \\
+V/W \arrow[ur, "\bar{T}"', dashed] \&
+\end{tikzcd}
+\end{center}
+
+The map $\bar{T}$ is defined by $\bar{T}(v + W) = T(v)$.
+\end{theorem}
+
+\textbf{Intuition:} The quotient $V/W$ is the ``best'' way to collapse $W$ to zero while preserving the vector space structure.
+
+\section*{Key Takeaways}
+\begin{itemize}
+    \item Equivalence relations partition sets into disjoint equivalence classes
+    \item Quotient vector spaces ``collapse'' a subspace to zero
+    \item The dimension formula: $\dim(V/W) = \dim(V) - \dim(W)$
+    \item First Isomorphism Theorem connects kernels and images
+    \item The universal property characterizes quotients up to isomorphism
+\end{itemize}
+
+\end{document}
