@@ -1,7 +1,9 @@
 einsteinpy
+pygame
 jupyter
 matplotlib
 numpy
 pandas
 plotly
 sympy
+pytest
