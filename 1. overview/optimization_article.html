@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Tour of Mathematical Optimization</title>
+<style>
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  background: #fff;
+  color: #292929;
+  line-height: 1.8;
+  font-size: 18px;
+}
+
+.article-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 60px 24px 100px;
+}
+
+h1 { font-size: 2.4rem; font-weight: 700; line-height: 1.2; margin: 0 0 18px; color: #111; }
+h2 { font-size: 1.55rem; font-weight: 700; margin: 52px 0 16px; color: #111;
+     border-bottom: 1px solid #e8e8e8; padding-bottom: 8px; }
+h3 { font-size: 1.15rem; font-weight: 700; margin: 32px 0 10px; color: #333; }
+h4 { font-size: 1rem;    font-weight: 700; margin: 24px 0 8px;  color: #444; }
+h5, h6 { font-size: 0.95rem; font-weight: 700; margin: 20px 0 6px; color: #555; }
+
+p  { margin-bottom: 20px; }
+ul, ol { padding-left: 1.6em; margin-bottom: 20px; }
+li { margin-bottom: 6px; }
+
+blockquote {
+  border-left: 3px solid #ddd;
+  margin: 24px 0;
+  padding: 4px 0 4px 20px;
+  color: #666;
+  font-style: italic;
+}
+
+hr { border: none; border-top: 1px solid #e8e8e8; margin: 48px 0; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 24px 0;
+        font-family: 'Helvetica Neue', Arial, sans-serif; }
+th { background: #f7f7f7; font-weight: 700; text-align: left; padding: 10px 14px;
+     border-bottom: 2px solid #ddd; color: #111; }
+td { padding: 9px 14px; border-bottom: 1px solid #eee; vertical-align: top; color: #333; }
+tr:hover td { background: #fafafa; }
+
+pre { background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 6px;
+      padding: 16px 20px; overflow-x: auto; margin: 24px 0; }
+pre code { background: none; padding: 0; font-size: 0.85rem; }
+code { font-family: 'Menlo', 'Consolas', monospace; font-size: 0.85em;
+       background: #f4f4f4; padding: 2px 5px; border-radius: 3px; }
+
+a { color: #1a73e8; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+figure { margin: 28px 0; }
+figcaption { font-size: 0.85rem; color: #888; text-align: center; margin-top: 8px; }
+strong { color: #111; }
+
+</style>
+</head>
+<body>
+<div class="article-wrap">
+<h1>A Tour of Mathematical Optimization</h1>
+<p>Optimization is everywhere. When your GPS finds the fastest route, when a hedge fund rebalances a portfolio, when a neural network learns from data — all of these reduce to the same abstract question: <em>how do you find the best solution out of all possible ones?</em></p>
+<p>This article walks through that question systematically, starting from the simplest possible case (one variable, no constraints) and building up to mixed-integer programs that power modern logistics and finance. The math isn't hidden, but the goal is always intuition first.</p>
+<hr>
+<h2>1. What Does "Optimization" Actually Mean?</h2>
+<p>At its core, every optimization problem is about minimizing an <strong>objective function</strong> <img src="https://latex.codecogs.com/png.image?\dpi{150}f%20%3A%20S%20%5Cto%20%5Cmathbb%7BR%7D" alt="f : S \to \mathbb{R}" style="vertical-align:middle;max-height:1.4em;"> over some set of allowed inputs <img src="https://latex.codecogs.com/png.image?\dpi{150}S" alt="S" style="vertical-align:middle;max-height:1.4em;">, called the <strong>feasible set</strong>:</p>
+<div style="text-align:center;margin:24px 0;"><img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cmin_%7Bx%20%5Cin%20S%7D%20%5C%3B%20f%28x%29" alt="\min_{x \in S} \; f(x)" style="max-width:100%;vertical-align:middle;"></div>
+<p>That's it. Everything else — gradients, constraints, integer variables — is machinery built on top of this one idea.</p>
+<p>A quick note on maximization: it's not a separate problem. Maximizing <img src="https://latex.codecogs.com/png.image?\dpi{150}f" alt="f" style="vertical-align:middle;max-height:1.4em;"> is identical to minimizing <img src="https://latex.codecogs.com/png.image?\dpi{150}-f" alt="-f" style="vertical-align:middle;max-height:1.4em;">, so without loss of generality we always talk about minimization.</p>
+<p>Now, "the best solution" turns out to be a slippery concept. There are two distinct things it could mean:</p>
+<ul>
+<li>A <strong>global minimizer</strong> <img src="https://latex.codecogs.com/png.image?\dpi{150}x%5E%2A" alt="x^<em>" style="vertical-align:middle;max-height:1.4em;"> satisfies <img src="https://latex.codecogs.com/png.image?\dpi{150}f%28x%5E%2A%29%20%5Cleq%20f%28x%29" alt="f(x^</em>) \leq f(x)" style="vertical-align:middle;max-height:1.4em;"> for <em>every</em> <img src="https://latex.codecogs.com/png.image?\dpi{150}x%20%5Cin%20S" alt="x \in S" style="vertical-align:middle;max-height:1.4em;">. This is the true best.</li>
+<li>A <strong>local minimizer</strong> <img src="https://latex.codecogs.com/png.image?\dpi{150}x%5E%2A" alt="x^<em>" style="vertical-align:middle;max-height:1.4em;"> satisfies <img src="https://latex.codecogs.com/png.image?\dpi{150}f%28x%5E%2A%29%20%5Cleq%20f%28x%29" alt="f(x^</em>) \leq f(x)" style="vertical-align:middle;max-height:1.4em;"> only for <img src="https://latex.codecogs.com/png.image?\dpi{150}x" alt="x" style="vertical-align:middle;max-height:1.4em;"> <em>near</em> <img src="https://latex.codecogs.com/png.image?\dpi{150}x%5E%2A" alt="x^*" style="vertical-align:middle;max-height:1.4em;"> — it's the bottom of some local valley, but there might be a deeper valley elsewhere.</li>
+</ul>
+<p>Global minima are what we want. Local minima are usually all we can <em>find</em>. The gap between these two is arguably the central tension in all of optimization.</p>
+<hr>
+<h2>2. A Map of the Territory</h2>
+<p>Before diving in, it helps to know the landscape. Optimization problems come in many flavors, and the flavor determines which tools apply.</p>
+<table>
+<thead><tr><th>Class</th><th>Feasible set <img src="https://latex.codecogs.com/png.image?\dpi{150}S" alt="S" style="vertical-align:middle;max-height:1.4em;"></th><th>Key property</th></tr></thead>
+<tbody>
+<tr><td><strong>Discrete / Combinatorial</strong></td><td>Finite or countable</td><td>Enumeration or combinatorial structure (TSP, knapsack)</td></tr>
+<tr><td><strong>Continuous</strong></td><td><img src="https://latex.codecogs.com/png.image?\dpi{150}S%20%5Csubseteq%20%5Cmathbb%7BR%7D%5En" alt="S \subseteq \mathbb{R}^n" style="vertical-align:middle;max-height:1.4em;"></td><td>Calculus applies; gradients available</td></tr>
+<tr><td><strong>Linear (LP)</strong></td><td>Polyhedron (linear inequalities)</td><td>Solvable in polynomial time</td></tr>
+<tr><td><strong>Nonlinear (NLP)</strong></td><td>General</td><td>Richer structure, harder; local methods dominate</td></tr>
+<tr><td><strong>Convex</strong></td><td>Convex set, convex <img src="https://latex.codecogs.com/png.image?\dpi{150}f" alt="f" style="vertical-align:middle;max-height:1.4em;"></td><td>Every local min is global — the holy grail</td></tr>
+<tr><td><strong>Nonconvex</strong></td><td>Any</td><td>Multiple local minima; global optimality rarely certifiable</td></tr>
+<tr><td><strong>Mixed-Integer (MIP)</strong></td><td>Continuous + discrete variables</td><td>Scheduling, circuit design; branch-and-bound</td></tr>
+<tr><td><strong>Constrained</strong></td><td>Equations / inequalities</td><td>Lagrange multipliers, KKT conditions</td></tr>
+<tr><td><strong>Unconstrained</strong></td><td><img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cmathbb%7BR%7D%5En" alt="\mathbb{R}^n" style="vertical-align:middle;max-height:1.4em;"></td><td>Gradient and Newton methods apply directly</td></tr>
+</tbody>
+</table>
+
+<p>The single most important dividing line is <strong>convex vs. nonconvex</strong>. In a convex problem, the landscape has only one valley — any local minimum is automatically global, and efficient algorithms are guaranteed to find it. In a nonconvex problem, you might be standing at the bottom of a valley without knowing there's a deeper one two miles over.</p>
+<p>Most of deep learning lives in the nonconvex world, which is one reason training large models is so finicky.</p>
+<hr>
+<h2>3. Starting Simple: One Dimension</h2>
+<p>Let's begin with <img src="https://latex.codecogs.com/png.image?\dpi{150}f%20%3A%20%5Cmathbb%7BR%7D%20%5Cto%20%5Cmathbb%7BR%7D" alt="f : \mathbb{R} \to \mathbb{R}" style="vertical-align:middle;max-height:1.4em;">, a smooth function of a single variable. This is the simplest possible setting, and it already contains all the core ideas.</p>
+<h3>Local vs. Global</h3>
+<p>A function can have many local minima scattered along the real line but only one global minimum value. Calculus can find a local minimum reliably; finding the global one generally requires either special structure (convexity) or exhaustive search.</p>
+<h3>The First Derivative Condition</h3>
+<p>At any interior local minimizer <img src="https://latex.codecogs.com/png.image?\dpi{150}x%5E%2A" alt="x^*" style="vertical-align:middle;max-height:1.4em;">, the tangent line must be flat. If the slope were nonzero, you could nudge <img src="https://latex.codecogs.com/png.image?\dpi{150}x" alt="x" style="vertical-align:middle;max-height:1.4em;"> a little in the downhill direction to get a lower value — contradicting minimality. So:</p>
+<div style="text-align:center;margin:24px 0;"><img src="https://latex.codecogs.com/png.image?\dpi{150}f%27%28x%5E%2A%29%20%3D%200" alt="f'(x^*) = 0" style="max-width:100%;vertical-align:middle;"></div>
+<p>Points where <img src="https://latex.codecogs.com/png.image?\dpi{150}f%27%20%3D%200" alt="f' = 0" style="vertical-align:middle;max-height:1.4em;"> are called <strong>critical points</strong> or <strong>stationary points</strong>. The condition is <em>necessary</em> but not <em>sufficient</em>: a critical point could be a minimum, a maximum, or a saddle point. You need more information to tell them apart.</p>
+<h3>The Second Derivative Test</h3>
+<p>The second derivative tells you about curvature — is the function bending upward like a bowl, or downward like an arch?</p>
+<table>
+<thead><tr><th>Conditions</th><th>Conclusion</th></tr></thead>
+<tbody>
+<tr><td><img src="https://latex.codecogs.com/png.image?\dpi{150}f%27%28x%5E%2A%29%3D0" alt="f'(x^<em>)=0" style="vertical-align:middle;max-height:1.4em;"> and <img src="https://latex.codecogs.com/png.image?\dpi{150}f%27%27%28x%5E%2A%29%3E0" alt="f''(x^</em>)&gt;0" style="vertical-align:middle;max-height:1.4em;"></td><td>Strict local <strong>minimum</strong> — curving upward</td></tr>
+<tr><td><img src="https://latex.codecogs.com/png.image?\dpi{150}f%27%28x%5E%2A%29%3D0" alt="f'(x^<em>)=0" style="vertical-align:middle;max-height:1.4em;"> and <img src="https://latex.codecogs.com/png.image?\dpi{150}f%27%27%28x%5E%2A%29%3C0" alt="f''(x^</em>)&lt;0" style="vertical-align:middle;max-height:1.4em;"></td><td>Local <strong>maximum</strong> — curving downward</td></tr>
+<tr><td><img src="https://latex.codecogs.com/png.image?\dpi{150}f%27%28x%5E%2A%29%3D0" alt="f'(x^<em>)=0" style="vertical-align:middle;max-height:1.4em;"> and <img src="https://latex.codecogs.com/png.image?\dpi{150}f%27%27%28x%5E%2A%29%3D0" alt="f''(x^</em>)=0" style="vertical-align:middle;max-height:1.4em;"></td><td>Inconclusive — need higher-order analysis</td></tr>
+</tbody>
+</table>
+
+<p>The last row is the interesting one. When the second derivative is zero, you're at a <strong>saddle point</strong> — the function momentarily flattens out but doesn't actually turn around. The slope touches zero without changing sign.</p>
+<p><strong>A concrete example.</strong> Take <img src="https://latex.codecogs.com/png.image?\dpi{150}f%28x%29%20%3D%20x%5E3%20-%203x" alt="f(x) = x^3 - 3x" style="vertical-align:middle;max-height:1.4em;">. Then <img src="https://latex.codecogs.com/png.image?\dpi{150}f%27%28x%29%20%3D%203x%5E2%20-%203%20%3D%200" alt="f'(x) = 3x^2 - 3 = 0" style="vertical-align:middle;max-height:1.4em;"> gives <img src="https://latex.codecogs.com/png.image?\dpi{150}x%20%3D%20%5Cpm%201" alt="x = \pm 1" style="vertical-align:middle;max-height:1.4em;">. Since <img src="https://latex.codecogs.com/png.image?\dpi{150}f%27%27%28x%29%20%3D%206x" alt="f''(x) = 6x" style="vertical-align:middle;max-height:1.4em;">, we get <img src="https://latex.codecogs.com/png.image?\dpi{150}f%27%27%281%29%20%3D%206%20%3E%200" alt="f''(1) = 6 &gt; 0" style="vertical-align:middle;max-height:1.4em;"> (local minimum) and <img src="https://latex.codecogs.com/png.image?\dpi{150}f%27%27%28-1%29%20%3D%20-6%20%3C%200" alt="f''(-1) = -6 &lt; 0" style="vertical-align:middle;max-height:1.4em;"> (local maximum).</p>
+<h3>Visualizing All Three Critical Point Types</h3>
+<p>The plot below shows a function with all three types of critical point clearly marked. It's built by choosing the derivative <img src="https://latex.codecogs.com/png.image?\dpi{150}f%27%28x%29%20%3D%20%28x%2B2%29%5Ccdot%20x%20%5Ccdot%20%28x-2%29%20%5Ccdot%20%28x-4%29%5E2" alt="f'(x) = (x+2)\cdot x \cdot (x-2) \cdot (x-4)^2" style="vertical-align:middle;max-height:1.4em;"> and integrating — the double root at <img src="https://latex.codecogs.com/png.image?\dpi{150}x%20%3D%204" alt="x = 4" style="vertical-align:middle;max-height:1.4em;"> is what creates the saddle.</p>
+<figure style="text-align:center;margin:28px 0;"><img src="critical_points.png" alt="Critical points of a 1D function: global minimum at x=−2, local maximum at x=0, local minimum at x=2, saddle point at x=4" style="max-width:100%;"><figcaption style="font-size:0.88em;color:#666;margin-top:8px;">Critical points of a 1D function: global minimum at x=−2, local maximum at x=0, local minimum at x=2, saddle point at x=4</figcaption></figure>
+<p>The topology here is worth noting: a saddle point <em>cannot</em> sit between two minima. By Rolle's theorem, there must be a local maximum between any two local minima, so the saddle has to live outside that pair — here, to the right.</p>
+<hr>
+<h2>4. More Dimensions: Gradient Descent</h2>
+<p>Now let's generalize to <img src="https://latex.codecogs.com/png.image?\dpi{150}f%20%3A%20%5Cmathbb%7BR%7D%5En%20%5Cto%20%5Cmathbb%7BR%7D" alt="f : \mathbb{R}^n \to \mathbb{R}" style="vertical-align:middle;max-height:1.4em;">, a function of <img src="https://latex.codecogs.com/png.image?\dpi{150}n" alt="n" style="vertical-align:middle;max-height:1.4em;"> variables. The derivative <img src="https://latex.codecogs.com/png.image?\dpi{150}f%27" alt="f'" style="vertical-align:middle;max-height:1.4em;"> gets replaced by the <strong>gradient</strong> — a vector of partial derivatives pointing in the direction of steepest ascent:</p>
+<div style="text-align:center;margin:24px 0;"><img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cnabla%20f%28x%29%20%3D%20%5Cleft%28%5Cfrac%7B%5Cpartial%20f%7D%7B%5Cpartial%20x_1%7D%2C%5C%3B%20%5Cfrac%7B%5Cpartial%20f%7D%7B%5Cpartial%20x_2%7D%2C%5C%3B%20%5Cldots%2C%5C%3B%20%5Cfrac%7B%5Cpartial%20f%7D%7B%5Cpartial%20x_n%7D%5Cright%29%20%5Cin%20%5Cmathbb%7BR%7D%5En" alt="\nabla f(x) = \left(\frac{\partial f}{\partial x_1},\; \frac{\partial f}{\partial x_2},\; \ldots,\; \frac{\partial f}{\partial x_n}\right) \in \mathbb{R}^n" style="max-width:100%;vertical-align:middle;"></div>
+<p>The optimality conditions carry over almost word-for-word. At a local minimizer <img src="https://latex.codecogs.com/png.image?\dpi{150}x%5E%2A" alt="x^*" style="vertical-align:middle;max-height:1.4em;">:</p>
+<div style="text-align:center;margin:24px 0;"><img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cnabla%20f%28x%5E%2A%29%20%3D%200" alt="\nabla f(x^*) = 0" style="max-width:100%;vertical-align:middle;"></div>
+<p>And the second-derivative test uses the <strong>Hessian</strong> <img src="https://latex.codecogs.com/png.image?\dpi{150}H_f%28x%29%20%5Cin%20%5Cmathbb%7BR%7D%5E%7Bn%20%5Ctimes%20n%7D" alt="H_f(x) \in \mathbb{R}^{n \times n}" style="vertical-align:middle;max-height:1.4em;">, whose <img src="https://latex.codecogs.com/png.image?\dpi{150}%28i%2Cj%29" alt="(i,j)" style="vertical-align:middle;max-height:1.4em;"> entry is <img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cpartial%5E2%20f%20/%20%5Cpartial%20x_i%20%5Cpartial%20x_j" alt="\partial^2 f / \partial x_i \partial x_j" style="vertical-align:middle;max-height:1.4em;">:</p>
+<ul>
+<li><img src="https://latex.codecogs.com/png.image?\dpi{150}H_f%28x%5E%2A%29%20%5Csucc%200" alt="H_f(x^*) \succ 0" style="vertical-align:middle;max-height:1.4em;"> (positive definite) → strict local minimum</li>
+<li><img src="https://latex.codecogs.com/png.image?\dpi{150}H_f%28x%5E%2A%29%20%5Cprec%200" alt="H_f(x^*) \prec 0" style="vertical-align:middle;max-height:1.4em;"> (negative definite) → local maximum</li>
+<li><img src="https://latex.codecogs.com/png.image?\dpi{150}H_f%28x%5E%2A%29" alt="H_f(x^*)" style="vertical-align:middle;max-height:1.4em;"> indefinite → saddle point</li>
+</ul>
+<h3>The Algorithm: Gradient Descent</h3>
+<p>When we can't solve <img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cnabla%20f%28x%29%20%3D%200" alt="\nabla f(x) = 0" style="vertical-align:middle;max-height:1.4em;"> analytically — which is almost always — we iterate. <strong>Gradient descent</strong> takes small steps in the direction opposite to the gradient (the direction of steepest <em>descent</em>):</p>
+<div style="text-align:center;margin:24px 0;"><img src="https://latex.codecogs.com/png.image?\dpi{150}x_%7Bk%2B1%7D%20%3D%20x_k%20-%20%5Calpha_k%20%5C%2C%20%5Cnabla%20f%28x_k%29" alt="x_{k+1} = x_k - \alpha_k \, \nabla f(x_k)" style="max-width:100%;vertical-align:middle;"></div>
+<p>Here <img src="https://latex.codecogs.com/png.image?\dpi{150}%5Calpha_k%20%3E%200" alt="\alpha_k &gt; 0" style="vertical-align:middle;max-height:1.4em;"> is the <strong>step size</strong> (or learning rate). Choosing it well matters a lot:</p>
+<ul>
+<li>Too large: you overshoot and the iterate can diverge.</li>
+<li>Too small: you converge correctly but extremely slowly.</li>
+</ul>
+<p>In practice, the step size is set by a line search (Armijo/Wolfe conditions) or by an adaptive scheme like Adam or Adagrad, which maintain per-parameter learning rates and are standard in deep learning.</p>
+<hr>
+<h2>5. Constrained Optimization</h2>
+<p>Real problems rarely let you range freely over all of <img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cmathbb%7BR%7D%5En" alt="\mathbb{R}^n" style="vertical-align:middle;max-height:1.4em;">. Usually there are constraints — a budget limit, a physical law, a capacity ceiling. The general form is:</p>
+<div style="text-align:center;margin:24px 0;"><img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cmin_%7Bx%20%5Cin%20%5Cmathbb%7BR%7D%5En%7D%20f%28x%29%20%5Cquad%20%5Ctext%7Bsubject%20to%7D%20%5Cquad%20g_i%28x%29%20%3D%200%20%5C%3B%20%28i%3D1%2C%5Cldots%2Cm%29%2C%20%5Cquad%20h_j%28x%29%20%5Cleq%200%20%5C%3B%20%28j%3D1%2C%5Cldots%2Cp%29" alt="\min_{x \in \mathbb{R}^n} f(x) \quad \text{subject to} \quad g_i(x) = 0 \; (i=1,\ldots,m), \quad h_j(x) \leq 0 \; (j=1,\ldots,p)" style="max-width:100%;vertical-align:middle;"></div>
+<p>When constraints are present, you can't just set <img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cnabla%20f%20%3D%200" alt="\nabla f = 0" style="vertical-align:middle;max-height:1.4em;"> and walk away. The gradient of <img src="https://latex.codecogs.com/png.image?\dpi{150}f" alt="f" style="vertical-align:middle;max-height:1.4em;"> at the optimum might point outside the feasible region — the constraint is <em>holding you back</em>.</p>
+<h3>Lagrange Multipliers</h3>
+<p>For equality constraints, the classical tool is the <strong>Lagrangian</strong>:</p>
+<div style="text-align:center;margin:24px 0;"><img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cmathcal%7BL%7D%28x%2C%20%5Clambda%29%20%3D%20f%28x%29%20%2B%20%5Csum_%7Bi%3D1%7D%5Em%20%5Clambda_i%20%5C%2C%20g_i%28x%29" alt="\mathcal{L}(x, \lambda) = f(x) + \sum_{i=1}^m \lambda_i \, g_i(x)" style="max-width:100%;vertical-align:middle;"></div>
+<p>At a local minimizer, there exist <strong>multipliers</strong> <img src="https://latex.codecogs.com/png.image?\dpi{150}%5Clambda%5E%2A%20%5Cin%20%5Cmathbb%7BR%7D%5Em" alt="\lambda^* \in \mathbb{R}^m" style="vertical-align:middle;max-height:1.4em;"> such that:</p>
+<div style="text-align:center;margin:24px 0;"><img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cnabla%20f%28x%5E%2A%29%20%2B%20%5Csum_%7Bi%3D1%7D%5Em%20%5Clambda_i%5E%2A%20%5Cnabla%20g_i%28x%5E%2A%29%20%3D%200" alt="\nabla f(x^*) + \sum_{i=1}^m \lambda_i^* \nabla g_i(x^*) = 0" style="max-width:100%;vertical-align:middle;"></div>
+<p>The geometric meaning is elegant: at the optimum, the gradient of <img src="https://latex.codecogs.com/png.image?\dpi{150}f" alt="f" style="vertical-align:middle;max-height:1.4em;"> must lie in the span of the constraint gradients. In other words, you can't improve <img src="https://latex.codecogs.com/png.image?\dpi{150}f" alt="f" style="vertical-align:middle;max-height:1.4em;"> without violating a constraint — you're stuck on the constraint surface.</p>
+<h3>KKT Conditions</h3>
+<p>For inequality constraints, the <strong>Karush–Kuhn–Tucker (KKT)</strong> conditions generalize the above. At a local minimizer <img src="https://latex.codecogs.com/png.image?\dpi{150}x%5E%2A" alt="x^<em>" style="vertical-align:middle;max-height:1.4em;">, multipliers <img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cmu_j%5E%2A%20%5Cgeq%200" alt="\mu_j^</em> \geq 0" style="vertical-align:middle;max-height:1.4em;"> exist satisfying:</p>
+<div style="text-align:center;margin:24px 0;"><img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cnabla%20f%28x%5E%2A%29%20%2B%20%5Csum_i%20%5Clambda_i%5E%2A%20%5Cnabla%20g_i%28x%5E%2A%29%20%2B%20%5Csum_j%20%5Cmu_j%5E%2A%20%5Cnabla%20h_j%28x%5E%2A%29%20%3D%200" alt="\nabla f(x^*) + \sum_i \lambda_i^* \nabla g_i(x^*) + \sum_j \mu_j^* \nabla h_j(x^*) = 0" style="max-width:100%;vertical-align:middle;"></div>
+<div style="text-align:center;margin:24px 0;"><img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cmu_j%5E%2A%20%5Cgeq%200%2C%20%5Cquad%20%5Cmu_j%5E%2A%20h_j%28x%5E%2A%29%20%3D%200%20%5Cquad%20%5Cforall%20j" alt="\mu_j^* \geq 0, \quad \mu_j^* h_j(x^*) = 0 \quad \forall j" style="max-width:100%;vertical-align:middle;"></div>
+<p>The second line is called <strong>complementary slackness</strong>: a multiplier <img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cmu_j%5E%2A" alt="\mu_j^<em>" style="vertical-align:middle;max-height:1.4em;"> can only be positive if constraint <img src="https://latex.codecogs.com/png.image?\dpi{150}j" alt="j" style="vertical-align:middle;max-height:1.4em;"> is </em>active* (exactly tight) at the solution. An inactive constraint — one with slack to spare — contributes nothing to the optimality condition.</p>
+<p>For convex problems, KKT conditions are both necessary <em>and</em> sufficient, and strong duality holds between the primal and dual formulations.</p>
+<h3>Common Solution Methods</h3>
+<table>
+<thead><tr><th>Method</th><th>Idea</th></tr></thead>
+<tbody>
+<tr><td><strong>Penalty / Augmented Lagrangian</strong></td><td>Add a penalty for constraint violation; update multipliers iteratively</td></tr>
+<tr><td><strong>Interior-point</strong></td><td>Replace inequality constraints with a log-barrier; stay strictly feasible</td></tr>
+<tr><td><strong>Sequential Quadratic Programming (SQP)</strong></td><td>Solve a sequence of QP subproblems near the current point</td></tr>
+<tr><td><strong>Active-set methods</strong></td><td>Track which constraints are binding and treat them as equalities</td></tr>
+</tbody>
+</table>
+
+<p>Interior-point and SQP are the workhorses in engineering and finance for large constrained problems.</p>
+<hr>
+<h2>6. Linear Programming</h2>
+<p>A <strong>linear program (LP)</strong> is the special case where both the objective and all constraints are linear:</p>
+<div style="text-align:center;margin:24px 0;"><img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cmin_%7Bx%20%5Cin%20%5Cmathbb%7BR%7D%5En%7D%20%5C%3B%20c%5E%5Ctop%20x%20%5Cquad%20%5Ctext%7Bsubject%20to%7D%20%5Cquad%20Ax%20%3D%20b%2C%5C%3B%20x%20%5Cgeq%200" alt="\min_{x \in \mathbb{R}^n} \; c^\top x \quad \text{subject to} \quad Ax = b,\; x \geq 0" style="max-width:100%;vertical-align:middle;"></div>
+<p>This is called <strong>standard form</strong>. Any LP with inequality constraints can be converted to it by introducing <strong>slack variables</strong> (replace <img src="https://latex.codecogs.com/png.image?\dpi{150}Ax%20%5Cleq%20b" alt="Ax \leq b" style="vertical-align:middle;max-height:1.4em;"> with <img src="https://latex.codecogs.com/png.image?\dpi{150}Ax%20%2B%20s%20%3D%20b" alt="Ax + s = b" style="vertical-align:middle;max-height:1.4em;">, <img src="https://latex.codecogs.com/png.image?\dpi{150}s%20%5Cgeq%200" alt="s \geq 0" style="vertical-align:middle;max-height:1.4em;">).</p>
+<h3>Why LPs Are Special</h3>
+<p>The feasible set is a <strong>convex polyhedron</strong> — the intersection of finitely many half-spaces. Since the objective is linear (flat), it has no curvature, which means the minimum is always achieved at a <strong>vertex</strong> of the polyhedron. This geometric observation is the entire foundation of the simplex method.</p>
+<h3>The Simplex Method</h3>
+<p>Proposed by George Dantzig in 1947, simplex exploits the vertex structure directly:</p>
+<ol>
+<li>Start at a feasible vertex.</li>
+<li>Check whether any neighboring vertex improves the objective using <em>reduced costs</em>.</li>
+<li>Pivot to the best improving neighbor.</li>
+<li>Repeat until no improving neighbor exists — optimality is certified.</li>
+</ol>
+<p>In the worst case, simplex can visit exponentially many vertices. In practice, it's astonishingly fast. Most real LPs are solved in a number of pivots roughly linear in the problem size.</p>
+<h3>Interior-Point Methods</h3>
+<p>An alternative approach: rather than hopping between vertices, interior-point methods stay strictly <em>inside</em> the polyhedron and follow a smooth central path to the optimum. They run in provably polynomial time (<img src="https://latex.codecogs.com/png.image?\dpi{150}O%28n%5E%7B3.5%7D%29" alt="O(n^{3.5})" style="vertical-align:middle;max-height:1.4em;">) and are preferred for very large LPs where simplex struggles.</p>
+<h3>Where LPs Show Up</h3>
+<table>
+<thead><tr><th>Domain</th><th>The LP</th></tr></thead>
+<tbody>
+<tr><td>Resource allocation</td><td>Maximize production given resource limits</td></tr>
+<tr><td>Transportation</td><td>Minimize shipping cost between sources and sinks</td></tr>
+<tr><td>Network flow</td><td>Max-flow / min-cost flow on graphs</td></tr>
+<tr><td>Finance</td><td>Portfolio optimization with linear risk constraints</td></tr>
+</tbody>
+</table>
+
+<hr>
+<h2>7. Discrete Optimization: Why Integers Make Life Hard</h2>
+<p>So far everything has been continuous — variables can take any real value and calculus does the work. What happens when the variables are forced to be integers, like <img src="https://latex.codecogs.com/png.image?\dpi{150}x_i%20%5Cin%20%5C%7B0%2C%201%5C%7D" alt="x_i \in \{0, 1\}" style="vertical-align:middle;max-height:1.4em;"> or <img src="https://latex.codecogs.com/png.image?\dpi{150}x_i%20%5Cin%20%5Cmathbb%7BZ%7D" alt="x_i \in \mathbb{Z}" style="vertical-align:middle;max-height:1.4em;">?</p>
+<p>Things break badly, for three fundamental reasons.</p>
+<p><strong>No gradient.</strong> An integer domain isn't connected. There's no notion of "move slightly in direction <img src="https://latex.codecogs.com/png.image?\dpi{150}d" alt="d" style="vertical-align:middle;max-height:1.4em;">," so gradients and smooth calculus simply don't apply.</p>
+<p><strong>Rounding fails.</strong> You might think: solve the continuous relaxation, then round to the nearest integer. In general this doesn't work. The rounded solution may be infeasible, and even if it's feasible it can be arbitrarily far from optimal.</p>
+<p><strong>No local = global.</strong> The feasible set is a discrete lattice — not convex — so local search has no guarantee of finding anything good.</p>
+<p>And there's a more brutal problem lurking underneath: <strong>combinatorial explosion</strong>. For <img src="https://latex.codecogs.com/png.image?\dpi{150}n" alt="n" style="vertical-align:middle;max-height:1.4em;"> binary variables there are <img src="https://latex.codecogs.com/png.image?\dpi{150}2%5En" alt="2^n" style="vertical-align:middle;max-height:1.4em;"> candidate solutions. At <img src="https://latex.codecogs.com/png.image?\dpi{150}n%20%3D%20100" alt="n = 100" style="vertical-align:middle;max-height:1.4em;">, that's more than the number of atoms in the observable universe. Exhaustive search is completely hopeless.</p>
+<h3>NP-Hardness</h3>
+<p>Most interesting discrete optimization problems are <strong>NP-hard</strong>, meaning no polynomial-time algorithm is known and finding one would prove P = NP. The canonical examples:</p>
+<table>
+<thead><tr><th>Problem</th><th>The question</th></tr></thead>
+<tbody>
+<tr><td><strong>Traveling Salesman (TSP)</strong></td><td>Is there a tour of all cities with total length <img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cleq%20k" alt="\leq k" style="vertical-align:middle;max-height:1.4em;">?</td></tr>
+<tr><td><strong>0–1 Knapsack</strong></td><td>Can we pack items with total value <img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cgeq%20v" alt="\geq v" style="vertical-align:middle;max-height:1.4em;"> and weight <img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cleq%20W" alt="\leq W" style="vertical-align:middle;max-height:1.4em;">?</td></tr>
+<tr><td><strong>Graph Coloring</strong></td><td>Can the graph be colored with <img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cleq%20k" alt="\leq k" style="vertical-align:middle;max-height:1.4em;"> colors?</td></tr>
+<tr><td><strong>Set Cover</strong></td><td>Can we cover all elements using <img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cleq%20k" alt="\leq k" style="vertical-align:middle;max-height:1.4em;"> sets?</td></tr>
+<tr><td><strong>Max Clique</strong></td><td>Is there a clique of size <img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cgeq%20k" alt="\geq k" style="vertical-align:middle;max-height:1.4em;">?</td></tr>
+</tbody>
+</table>
+
+<p>NP-hardness doesn't mean "impossible" — it means you have to make a tradeoff: either accept algorithms that are slow in the worst case, or accept solutions that might not be optimal.</p>
+<hr>
+<h2>8. Exact Algorithms for Discrete Optimization</h2>
+<p>Despite NP-hardness, several algorithms do well in practice by avoiding exhaustive search through intelligent pruning.</p>
+<h3>Exhaustive Search</h3>
+<p>The baseline: enumerate everything and keep the best. Correct by definition, practical only for tiny instances (<img src="https://latex.codecogs.com/png.image?\dpi{150}n%20%5Clesssim%2020" alt="n \lesssim 20" style="vertical-align:middle;max-height:1.4em;">).</p>
+<h3>Branch and Bound</h3>
+<p>The standard framework for exact discrete optimization. The key idea is to use the LP <em>relaxation</em> (drop the integrality constraints and solve the continuous version) to get a lower bound on the true optimum, then prune any branch that can't beat the best integer solution found so far.</p>
+<ol>
+<li><strong>Relax</strong> integrality and solve the LP relaxation → get lower bound <img src="https://latex.codecogs.com/png.image?\dpi{150}L" alt="L" style="vertical-align:middle;max-height:1.4em;">.</li>
+<li><strong>Branch</strong> on a fractional variable, say <img src="https://latex.codecogs.com/png.image?\dpi{150}x_i%20%3D%203.7" alt="x_i = 3.7" style="vertical-align:middle;max-height:1.4em;">: spawn two subproblems with <img src="https://latex.codecogs.com/png.image?\dpi{150}x_i%20%5Cleq%203" alt="x_i \leq 3" style="vertical-align:middle;max-height:1.4em;"> and <img src="https://latex.codecogs.com/png.image?\dpi{150}x_i%20%5Cgeq%204" alt="x_i \geq 4" style="vertical-align:middle;max-height:1.4em;">.</li>
+<li><strong>Bound</strong> each subproblem with its own LP relaxation. If a subproblem's lower bound exceeds the best integer solution found so far (the <em>incumbent</em>), prune it.</li>
+<li>Recurse until all subproblems are solved or pruned.</li>
+</ol>
+<p>The tighter the LP bound, the more aggressively you can prune, and the faster the algorithm.</p>
+<h3>Dynamic Programming</h3>
+<p>For problems with <strong>optimal substructure</strong> — where the optimum of the whole decomposes into optima of smaller subproblems — dynamic programming finds the exact solution efficiently.</p>
+<p>The 0–1 Knapsack problem is the classic example. Let <img src="https://latex.codecogs.com/png.image?\dpi{150}dp%5Bi%5D%5Bw%5D" alt="dp[i][w]" style="vertical-align:middle;max-height:1.4em;"> be the maximum value achievable using the first <img src="https://latex.codecogs.com/png.image?\dpi{150}i" alt="i" style="vertical-align:middle;max-height:1.4em;"> items with weight limit <img src="https://latex.codecogs.com/png.image?\dpi{150}w" alt="w" style="vertical-align:middle;max-height:1.4em;">:</p>
+<div style="text-align:center;margin:24px 0;"><img src="https://latex.codecogs.com/png.image?\dpi{150}dp%5Bi%5D%5Bw%5D%20%3D%20%5Cmax%5C%21%5Cleft%28dp%5Bi-1%5D%5Bw%5D%2C%5C%3B%20v_i%20%2B%20dp%5Bi-1%5D%5Bw%20-%20w_i%5D%5Cright%29" alt="dp[i][w] = \max\!\left(dp[i-1][w],\; v_i + dp[i-1][w - w_i]\right)" style="max-width:100%;vertical-align:middle;"></div>
+<p>This runs in <img src="https://latex.codecogs.com/png.image?\dpi{150}O%28nW%29" alt="O(nW)" style="vertical-align:middle;max-height:1.4em;"> — polynomial in <img src="https://latex.codecogs.com/png.image?\dpi{150}n" alt="n" style="vertical-align:middle;max-height:1.4em;"> and <img src="https://latex.codecogs.com/png.image?\dpi{150}W" alt="W" style="vertical-align:middle;max-height:1.4em;">, but exponential in the <em>bit length</em> of <img src="https://latex.codecogs.com/png.image?\dpi{150}W" alt="W" style="vertical-align:middle;max-height:1.4em;">. This distinction (pseudo-polynomial vs. truly polynomial) is subtle but important in complexity theory.</p>
+<h3>Branch and Cut</h3>
+<p>An enhancement of branch and bound that adds <strong>cutting planes</strong> at each node: valid inequalities that slice off the current fractional LP solution without removing any integer-feasible point. The effect is to tighten the LP bound, enabling more pruning and less branching. Branch and cut is the core engine of every modern MIP solver (Gurobi, CPLEX, HiGHS).</p>
+<hr>
+<h2>9. When Exact Isn't Affordable: Approximate Algorithms</h2>
+<p>For many large instances, even branch and cut is too slow. You need to trade provable optimality for tractability. Two philosophies dominate here.</p>
+<h3>Approximation Algorithms (With Guarantees)</h3>
+<p>An <strong><img src="https://latex.codecogs.com/png.image?\dpi{150}%5Calpha" alt="\alpha" style="vertical-align:middle;max-height:1.4em;">-approximation algorithm</strong> runs in polynomial time and guarantees that its output is within a factor <img src="https://latex.codecogs.com/png.image?\dpi{150}%5Calpha" alt="\alpha" style="vertical-align:middle;max-height:1.4em;"> of optimal:</p>
+<div style="text-align:center;margin:24px 0;"><img src="https://latex.codecogs.com/png.image?\dpi{150}f%28x_%7B%5Ctext%7Bapprox%7D%7D%29%20%5Cleq%20%5Calpha%20%5Ccdot%20f%28x%5E%2A%29" alt="f(x_{\text{approx}}) \leq \alpha \cdot f(x^*)" style="max-width:100%;vertical-align:middle;"></div>
+<p>This is a <em>worst-case</em> guarantee — not just "works well on average" but "provably never does worse than <img src="https://latex.codecogs.com/png.image?\dpi{150}%5Calpha%20%5Ccdot%20%5Ctext%7Boptimal%7D" alt="\alpha \cdot \text{optimal}" style="vertical-align:middle;max-height:1.4em;">."</p>
+<p>Some notable examples:</p>
+<ul>
+<li><strong>Greedy Set Cover</strong> achieves a <img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cln%20n" alt="\ln n" style="vertical-align:middle;max-height:1.4em;"> approximation — and this ratio is <em>tight</em>: no polynomial-time algorithm can do better unless P = NP.</li>
+<li><strong>Christofides' algorithm for TSP</strong> on metric instances finds a tour within <img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cfrac%7B3%7D%7B2%7D" alt="\frac{3}{2}" style="vertical-align:middle;max-height:1.4em;"> of optimal, by combining a minimum spanning tree with a minimum-weight perfect matching on odd-degree vertices.</li>
+<li><strong>FPTAS for Knapsack</strong>: for any <img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cvarepsilon%20%3E%200" alt="\varepsilon &gt; 0" style="vertical-align:middle;max-height:1.4em;">, returns a <img src="https://latex.codecogs.com/png.image?\dpi{150}%281%2B%5Cvarepsilon%29" alt="(1+\varepsilon)" style="vertical-align:middle;max-height:1.4em;">-approximation in time polynomial in both <img src="https://latex.codecogs.com/png.image?\dpi{150}n" alt="n" style="vertical-align:middle;max-height:1.4em;"> and <img src="https://latex.codecogs.com/png.image?\dpi{150}1/%5Cvarepsilon" alt="1/\varepsilon" style="vertical-align:middle;max-height:1.4em;">. You can get arbitrarily close to optimal at a controlled computational cost.</li>
+</ul>
+<h3>Metaheuristics (Without Guarantees)</h3>
+<p>Metaheuristics are general-purpose strategies that explore the solution space with no provable quality guarantee, but often find excellent solutions in practice:</p>
+<table>
+<thead><tr><th>Method</th><th>Core idea</th></tr></thead>
+<tbody>
+<tr><td><strong>Local search</strong></td><td>Start from any feasible solution; keep moving to better neighbors</td></tr>
+<tr><td><strong>Simulated annealing</strong></td><td>Like local search, but occasionally accept worse solutions with probability <img src="https://latex.codecogs.com/png.image?\dpi{150}e%5E%7B-%5CDelta/T%7D" alt="e^{-\Delta/T}" style="vertical-align:middle;max-height:1.4em;">; slowly cool <img src="https://latex.codecogs.com/png.image?\dpi{150}T" alt="T" style="vertical-align:middle;max-height:1.4em;"> to zero</td></tr>
+<tr><td><strong>Genetic algorithms</strong></td><td>Maintain a population of solutions; evolve via crossover and mutation</td></tr>
+<tr><td><strong>Tabu search</strong></td><td>Local search with a memory of recently visited solutions to prevent cycling</td></tr>
+<tr><td><strong>Ant colony optimization</strong></td><td>Pheromone-guided search; particularly effective on routing and TSP</td></tr>
+</tbody>
+</table>
+
+<p>Simulated annealing is worth pausing on. The idea of occasionally accepting a <em>worse</em> solution sounds counterproductive, but it's exactly what lets the algorithm escape local optima and explore the broader landscape. As the temperature <img src="https://latex.codecogs.com/png.image?\dpi{150}T" alt="T" style="vertical-align:middle;max-height:1.4em;"> cools, the algorithm becomes increasingly greedy and converges.</p>
+<hr>
+<h2>10. Mixed Integer Programming</h2>
+<p><strong>Mixed integer programming (MIP)</strong> brings continuous and discrete variables together in the same problem:</p>
+<div style="text-align:center;margin:24px 0;"><img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cmin_%7Bx%20%5Cin%20%5Cmathbb%7BR%7D%5Ep%2C%5C%3B%20y%20%5Cin%20%5Cmathbb%7BZ%7D%5Eq%7D%20%5C%3B%20c%5E%5Ctop%20x%20%2B%20d%5E%5Ctop%20y%20%5Cquad%20%5Ctext%7Bsubject%20to%7D%20%5Cquad%20Ax%20%2B%20By%20%5Cleq%20b" alt="\min_{x \in \mathbb{R}^p,\; y \in \mathbb{Z}^q} \; c^\top x + d^\top y \quad \text{subject to} \quad Ax + By \leq b" style="max-width:100%;vertical-align:middle;"></div>
+<p>The continuous variables <img src="https://latex.codecogs.com/png.image?\dpi{150}x" alt="x" style="vertical-align:middle;max-height:1.4em;"> model quantities that vary smoothly; the integer variables <img src="https://latex.codecogs.com/png.image?\dpi{150}y" alt="y" style="vertical-align:middle;max-height:1.4em;"> encode discrete decisions — on/off switches, assignment choices, selection flags.</p>
+<h3>The Expressive Power of Binary Variables</h3>
+<p>This combination is remarkably powerful. Binary variables can encode logical structure that plain LP can't touch:</p>
+<table>
+<thead><tr><th>What you want to say</th><th>How you say it in MIP</th></tr></thead>
+<tbody>
+<tr><td>At most one of <img src="https://latex.codecogs.com/png.image?\dpi{150}%5C%7Bx_1%2C%20x_2%2C%20x_3%5C%7D" alt="\{x_1, x_2, x_3\}" style="vertical-align:middle;max-height:1.4em;"> is active</td><td><img src="https://latex.codecogs.com/png.image?\dpi{150}x_1%20%2B%20x_2%20%2B%20x_3%20%5Cleq%201" alt="x_1 + x_2 + x_3 \leq 1" style="vertical-align:middle;max-height:1.4em;">, <img src="https://latex.codecogs.com/png.image?\dpi{150}x_i%20%5Cin%20%5C%7B0%2C1%5C%7D" alt="x_i \in \{0,1\}" style="vertical-align:middle;max-height:1.4em;"></td></tr>
+<tr><td>Pay a fixed cost <img src="https://latex.codecogs.com/png.image?\dpi{150}f" alt="f" style="vertical-align:middle;max-height:1.4em;"> if <img src="https://latex.codecogs.com/png.image?\dpi{150}x%20%3E%200" alt="x &gt; 0" style="vertical-align:middle;max-height:1.4em;"></td><td><img src="https://latex.codecogs.com/png.image?\dpi{150}x%20%5Cleq%20My" alt="x \leq My" style="vertical-align:middle;max-height:1.4em;">, objective <img src="https://latex.codecogs.com/png.image?\dpi{150}%2B%20fy" alt="+ fy" style="vertical-align:middle;max-height:1.4em;">, <img src="https://latex.codecogs.com/png.image?\dpi{150}y%20%5Cin%20%5C%7B0%2C1%5C%7D" alt="y \in \{0,1\}" style="vertical-align:middle;max-height:1.4em;"> (big-M trick)</td></tr>
+<tr><td>Either constraint A holds, or constraint B holds</td><td>Big-M with a binary indicator</td></tr>
+<tr><td>Task <img src="https://latex.codecogs.com/png.image?\dpi{150}i" alt="i" style="vertical-align:middle;max-height:1.4em;"> can't start until task <img src="https://latex.codecogs.com/png.image?\dpi{150}j" alt="j" style="vertical-align:middle;max-height:1.4em;"> finishes</td><td>Disjunctive constraint via binary variable</td></tr>
+</tbody>
+</table>
+
+<h3>Where MIP Is Used</h3>
+<table>
+<thead><tr><th>Domain</th><th>The MIP formulation</th></tr></thead>
+<tbody>
+<tr><td><strong>Facility location</strong></td><td>Which warehouses to open (binary) + how much to ship from each (continuous)</td></tr>
+<tr><td><strong>Crew scheduling</strong></td><td>Assign staff to shifts while satisfying labor rules</td></tr>
+<tr><td><strong>Production planning</strong></td><td>When to start machines (binary) + how much to produce (continuous)</td></tr>
+<tr><td><strong>Portfolio selection</strong></td><td>Choose at most <img src="https://latex.codecogs.com/png.image?\dpi{150}k" alt="k" style="vertical-align:middle;max-height:1.4em;"> assets (binary) + allocate capital (continuous)</td></tr>
+<tr><td><strong>Network design</strong></td><td>Which edges to build (binary) + flow on each (continuous)</td></tr>
+</tbody>
+</table>
+
+<h3>How Solvers Tackle It</h3>
+<p>Modern MIP solvers run <strong>branch and cut on the LP relaxation</strong> — the same approach as Section 8, but now heavily engineered. At each node, the solver:</p>
+<ul>
+<li><strong>Preprocesses</strong> the formulation to tighten bounds before the main solve</li>
+<li><strong>Adds cutting planes</strong> (Gomory cuts, knapsack covers, and dozens of others) to sharpen the LP bound</li>
+<li><strong>Runs primal heuristics</strong> to quickly find good integer solutions that raise the pruning bar</li>
+<li><strong>Chooses branching variables</strong> strategically based on pseudocost estimates</li>
+</ul>
+<p>The result is remarkable: practical MIPs with millions of variables are solved routinely in industry, despite worst-case exponential complexity. The gap between theory (NP-hard) and practice (often fast) is one of the more striking facts in applied mathematics.</p>
+<hr>
+<h2>Wrapping Up</h2>
+<p>We started from a single equation — <img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cmin_%7Bx%20%5Cin%20S%7D%20f%28x%29" alt="\min_{x \in S} f(x)" style="vertical-align:middle;max-height:1.4em;"> — and followed it through increasingly complex terrain: from 1D calculus to gradient descent, from Lagrange multipliers to LP, from NP-hardness to branch and cut.</p>
+<p>A few threads worth carrying forward:</p>
+<ul>
+<li><strong>Convexity is the dividing line.</strong> If your problem is convex, life is good: local = global, and efficient algorithms exist. If not, you're navigating a landscape full of traps.</li>
+<li><strong>The derivative condition <img src="https://latex.codecogs.com/png.image?\dpi{150}%5Cnabla%20f%20%3D%200" alt="\nabla f = 0" style="vertical-align:middle;max-height:1.4em;"> is necessary but not sufficient.</strong> Always check second-order conditions — or accept that you might be at a saddle rather than a minimum.</li>
+<li><strong>Integers are fundamentally hard.</strong> The jump from continuous to discrete variables changes the problem class from "tractable" to "NP-hard," and no general-purpose trick bridges that gap. What we have instead are algorithms that work well in practice even when theory offers no guarantees.</li>
+</ul>
+<p>The field goes much deeper — duality theory, stochastic optimization, optimal control, infinite-dimensional calculus of variations — but these ten sections cover the ground that shows up most often in practice.</p>
+</div>
+</body>
+</html>
