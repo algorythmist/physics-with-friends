@@ -1,0 +1,580 @@
+\documentclass[11pt]{article}
+
+% ----- Packages -----
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{braket}          % \ket, \bra, \braket, \ketbra
+\usepackage{mathtools}
+\usepackage{bm}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!55!black, urlcolor=blue!55!black}
+
+% ----- Convenience macros -----
+\newcommand{\Tr}{\operatorname{Tr}}
+\newcommand{\supp}{\operatorname{supp}}
+\newcommand{\argmax}{\operatorname*{arg\,max}}
+\DeclareMathOperator{\indic}{\mathbb{1}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\onenorm}[1]{\left\lVert #1 \right\rVert_{1}}
+
+\title{\textbf{Quantum Information Theory}\\[4pt]
+Operational Distance for Quantum States:\\
+Trace Distance \& Helstrom Discrimination}
+\author{}
+\date{Talk 2 --- June 25, 2026}
+
+\begin{document}
+\maketitle
+
+\noindent\emph{Main idea:} introduce a distance measure between two quantum
+states and relate it to something physically measurable.
+
+%===============================================================
+\section{Classical Case}
+%===============================================================
+
+We are given a sample realization $x$ (with $x\in\R$, say) that could be drawn
+from one of two probability distributions, $p(x)$ or $q(x)$, with probability
+$\tfrac12$ each.
+
+\medskip
+Given $\{x,\,p(x),\,q(x)\}$ we want to make the best choice / guess of which
+pdf the sample $x$ came from. We want a \emph{decision rule}, optimal in some
+sense, that chooses $X\sim p(x)$ or $X\sim q(x)$ with the highest probability
+of success, $p^{\mathrm{succ}}$.
+
+\[
+\begin{array}{ccc}
+X\sim p(x) \\[2pt]
+\quad ? \searrow \\
+& \boxed{\;\text{Decision Rule}\;}
+& \longrightarrow\ \{P,\,Q\} \ \rightsquigarrow\ p^{\mathrm{succ}} \\
+\quad ? \nearrow \\[2pt]
+X\sim q(x)
+\end{array}
+\]
+
+%---------------------------------------------------------------
+\subsection{Systematically designing an optimal decision rule}
+%---------------------------------------------------------------
+
+Let $d$ be a random variable taking values in $\{P,Q\}$, representing the two
+distributions $p(x),\,q(x)$ (a label). We observe a random variable $X$ drawn
+from one of the two distributions:
+\[
+p(X\mid d=P) = p(X), \qquad
+p(X\mid d=Q) = q(X).
+\]
+We have the (uniform) prior
+\[
+P(d=P) = P(d=Q) = \tfrac12 .
+\]
+
+Using Bayes' law,
+\[
+p(d,X) = p(d\mid X)\,p(X) = p(X\mid d)\,p(d),
+\]
+so that
+\[
+p(d\mid X) = \frac{p(X\mid d)\,p(d)}{p(X)} .
+\]
+
+Given an observation $X$, choose the $d$ that maximizes $p(d\mid X)$. On the
+right-hand side:
+\begin{itemize}[nosep]
+  \item $p(d)=\tfrac12$ is a constant, independent of $d$;
+  \item $p(X)$ is independent of $d$.
+\end{itemize}
+Therefore
+\[
+p(d\mid X)\ \propto\ p(X\mid d).
+\]
+
+Take the optimal $d$ given observed $X$ to be the value $d=d^{*}$ that
+maximizes $p(d\mid X)$:
+\[
+d^{*}
+= \argmax_{d}\ p(d\mid X)
+\quad\text{(not known directly)}
+= \argmax_{d}\ p(X\mid d)
+\quad\text{(known directly),}
+\]
+since $p(X\mid d=P)=p(x)$ and $p(X\mid d=Q)=q(x)$.
+
+%---------------------------------------------------------------
+\subsection{The decision rule}
+%---------------------------------------------------------------
+
+\[
+\text{Given } x,\ \text{choose}\quad
+\begin{cases}
+P & \text{if } p(x) > q(x),\\[2pt]
+Q & \text{if } q(x) > p(x).
+\end{cases}
+\]
+
+\paragraph{Performance of the decision rule.}
+What is $p^{\mathrm{succ}}$ for given $p(x),\,q(x)$? Generally, computing the
+performance is more involved than deriving the optimal decision rule. Write
+\[
+p^{\mathrm{succ}} = P(d^{*}=d_{c}),
+\]
+where $d_{c}\in\{P,Q\}$ is the chosen source distribution of $X$, and we want
+the marginal over $P$ and $Q$.
+
+Write the full joint distribution of all variables, $P(d^{*},x,d_{c})$. Since
+$d^{*}$ is a function of $x$ and we are interested in the event $d^{*}=d_{c}$,
+\[
+p^{\mathrm{succ}} = P(d^{*}=d_{c})
+= \sum_{\substack{\forall x\\ d_{c}\in\{P,Q\}}}
+P\!\left(d^{*}(x)=d_{c},\,x,\,d_{c}\right).
+\]
+Using the Markov decomposition $P(A,B,C)=P(A\mid B,C)\,P(B\mid C)\,P(C)$,
+\[
+p^{\mathrm{succ}}
+= \sum_{x,\,d_{c}}
+P\!\left(d^{*}(x)=d_{c}\mid x,d_{c}\right)\,
+\underbrace{P(x\mid d_{c})}_{\substack{p(x)\ \text{for } d_{c}=P\\ q(x)\ \text{for } d_{c}=Q}}\;
+\underbrace{P(d_{c})}_{\tfrac12}.
+\]
+
+But we can write
+\[
+P\!\left(d^{*}(x)=d_{c}\mid x,d_{c}\right)
+=
+\begin{cases}
+\indic\!\left[\,p(x)>q(x)\,\right] & \text{when } d_{c}=P,\\[4pt]
+\indic\!\left[\,q(x)>p(x)\,\right] & \text{when } d_{c}=Q,
+\end{cases}
+\]
+where $\indic[\cdot]$ is the indicator function. So
+\[
+p^{\mathrm{succ}}
+= \sum_{x:\,p(x)>q(x)} 1\cdot p(x)\cdot\tfrac12
+\;+\;
+\sum_{x:\,q(x)>p(x)} 1\cdot q(x)\cdot\tfrac12
+= \frac12\!\left(\sum_{x:\,p>q} p(x) + \sum_{x:\,q>p} q(x)\right),
+\]
+which gives the compact form
+\[
+\boxed{\; p^{\mathrm{succ}} = \frac12\sum_{x}\max\!\big(p(x),\,q(x)\big). \;}
+\]
+
+Using the identity $\max(a,b)=\dfrac{a+b+|a-b|}{2}$, and noting
+$\sum_x p(x)=\sum_x q(x)=1$,
+\[
+p^{\mathrm{succ}}
+= \frac14\sum_{x}\Big(p(x)+q(x)+|p(x)-q(x)|\Big)
+= \frac12\!\left(1 + \frac12\sum_{x}|p(x)-q(x)|\right).
+\]
+
+%===============================================================
+\section{Total Variation}
+%===============================================================
+
+Define the \emph{total variation} distance as
+\[
+\boxed{\;
+TV(p,q) = \frac12\sum_{x}|p(x)-q(x)|
+= \frac12\,\onenorm{p(x)-q(x)},
+\;}
+\]
+where $\onenorm{f} = \sum_{x}|f(x)| = \displaystyle\int|f(x)|\,dx$ is the
+one-norm. Then
+\[
+\boxed{\;
+p^{\mathrm{succ}} = \frac12\!\left(1 + \frac12\,TV(p,q)\right).
+\;}
+\]
+
+%---------------------------------------------------------------
+\subsection*{Properties of $TV(p,q)=\tfrac12\onenorm{p-q}$}
+%---------------------------------------------------------------
+
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*]
+\item \textbf{Minimum value $0$.}
+For each $x$ in the sum, the term is minimized by having $p(x)=q(x)$. Then the
+distributions are indistinguishable, and
+\[
+p^{\mathrm{succ}} = \frac12\!\left(1 + \frac12\cdot 0\right) = \frac12
+\quad\rightarrow\ \text{random choice.}
+\]
+
+\item \textbf{Maximum value $1$.}
+Occurs when the supports of $p(x)$ and $q(x)$ are disjoint, where
+$\supp f(x)=\{x\mid f(x)\neq 0\}$. Suppose $p,q$ are disjoint:
+\begin{align*}
+\frac12\sum_{x}|p(x)-q(x)|
+&= \frac12\!\left(
+\sum_{\substack{x\\ p\neq 0,\ q=0}}|p(x)-q(x)|
++ \sum_{\substack{x\\ p=0,\ q\neq 0}}|p(x)-q(x)|
+\right)\\
+&= \frac12\sum_{\substack{x\\ p\neq 0,\ q=0}} p(x)
++ \frac12\sum_{\substack{x\\ p=0,\ q\neq 0}} q(x)
+\qquad(\text{disjoint})\\
+&= \frac12 + \frac12 = 1.
+\end{align*}
+(Overlap always decreases the sum.)
+
+\item \textbf{$TV(p,q)=\tfrac12\onenorm{p-q}$ is a true metric distance,} so
+the pdf's form a metric space:
+\begin{enumerate}[label=(\roman*), nosep]
+  \item $TV(p,q)\ge 0$;
+  \item $TV(p,q)=TV(q,p)$;
+  \item $TV(p,q)=0 \iff p=q$;
+  \item triangle inequality.
+\end{enumerate}
+(One can do limits, completion, etc.\ as usual in abstract metric spaces.)
+\end{enumerate}
+
+%===============================================================
+\section{Quantum Binary Discrimination}
+%===============================================================
+
+Same idea as classical discrimination, but between two quantum states:
+density operators / matrices $\rho$ and $\sigma$.
+
+%---------------------------------------------------------------
+\subsection{Review}
+%---------------------------------------------------------------
+
+An observable is a Hermitian operator / matrix $A$. It admits an
+eigendecomposition:
+\[
+A = \sum_{a} a\,\ket{\psi_a}\!\bra{\psi_a}
+  = \sum_{a} a\,P_a,
+\]
+where the $a$ are real eigenvalues and measured physical outcomes (e.g.\
+energy, position), the $\ket{\psi_a}$ are orthonormal eigenstates, and $P_a$
+is a projection operator. Sometimes written $\sum_a a\,\ket{a}\!\bra{a}$, with
+$a$ now a label (a real number).
+
+An ensemble of quantum states, each with an assigned probability
+$\{p_i,\,\ket{\psi_i}\}$, is represented as a density operator / matrix:
+\[
+\rho = \sum_{i} p_i\,\ket{\psi_i}\!\bra{\psi_i}
+\quad\longrightarrow\ \text{a quantum version of a classical pd function.}
+\]
+
+Given a quantum state $\rho$ and an observable $A$, the probability of
+measuring an outcome $a$ is
+\[
+P(a\mid\rho) = \Tr P_a\rho.
+\]
+Why? Because
+\begin{align*}
+\Tr P_a\rho
+&= \Tr\Big(\ket{a}\!\bra{a}\cdot\sum_i p_i\,\ket{\psi_i}\!\bra{\psi_i}\Big)
+= \Tr\sum_i p_i\,\braket{a|\psi_i}\braket{\psi_i|a}\\
+&= \sum_i p_i\,|\!\braket{a|\psi_i}\!|^{2}
+= \sum_i p(\psi_i)\,p(a\mid\psi_i),
+\end{align*}
+so that
+\[
+\boxed{\;\Tr P_a\rho = p(a).\;}
+\]
+So projections like $P_a$ describe these kinds of measurement outcomes.
+
+\paragraph{Properties of the projectors.}
+\begin{enumerate}[label=(\arabic*), nosep]
+  \item $P_a \ge 0$ \quad (positive semi-definite);
+  \item $P_a^{2}=P_a$, \quad $P_a P_b = P_a\,\delta_{ab}$ \quad
+        (projections $+$ orthogonality);
+  \item $\displaystyle\sum_a P_a = I$ \quad (completeness).
+\end{enumerate}
+
+%---------------------------------------------------------------
+\subsection{POVMs}
+%---------------------------------------------------------------
+
+In more general cases --- coarse graining, noisy measurements, or attaching an
+ancilla system, performing a projective measurement, and discarding --- we use
+more general operators: POVMs, $E_k$.
+
+\paragraph{Properties.}
+\begin{enumerate}[label=(\arabic*), nosep]
+  \item Born outcome probability rule: $\ P(k\mid\rho) = \Tr E_k\rho$;
+  \item $E_k \ge 0$;
+  \item $\displaystyle\sum_k E_k = I$.
+\end{enumerate}
+(Properties 1--3 are the same as for PVM projective measurements.) The
+following differ from PVMs:
+\begin{enumerate}[label=(\arabic*), start=4, nosep]
+  \item Not orthogonal: $\ E_\ell E_m \neq \delta_{\ell m} E_\ell$ in general;
+  \item Not projections: $\ E_k^{2} \neq E_k$ in general.
+\end{enumerate}
+
+%===============================================================
+\section{Two-Outcome POVM Discrimination}
+%===============================================================
+
+We are given two possible states $\rho_0,\rho_1$. We will be handed one to use,
+with probability $p_0$ for $\rho_0$ and $p_1$ for $\rho_1$, where $p_0+p_1=1$.
+We perform a two-outcome measurement to decide which state, using a POVM
+$\{E_0,E_1\}$. Let $p_0=p$ and $p_1=1-p$.
+
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*]
+\item We have $E_0+E_1=I$ and $E_0,E_1\ge 0$. So the POVM is $\{E_0,\,I-E_0\}$;
+call $E_0=E$. Then $I-E\ge 0 \Rightarrow E\le I$, so
+\[
+0 \le E \le I \quad\longrightarrow\quad
+\text{all eigenvalues of } E \text{ satisfy } 0\le\lambda\le 1.
+\]
+
+\item We have two quantum states prepared: $\rho_0$ with $P(\rho_0)=p$, and
+$\rho_1$ with $P(\rho_1)=1-p$. (Compare the classical case of pdf's $\{p,q\}$
+with probability $\tfrac12$ each.)
+
+\item Perform a measurement:
+\[
+\begin{aligned}
+\text{Outcome } E_0=E \ &\Rightarrow\ \text{decide } \rho_0 \text{ is the quantum state},\\
+\text{Outcome } E_1=I-E \ &\Rightarrow\ \text{decide } \rho_1 \text{ is the quantum state}.
+\end{aligned}
+\]
+
+\item We have two ways of deciding correctly:
+\[
+\begin{aligned}
+&\text{True state } \rho_0 \ (\text{prob. } p):
+&&\text{Prob.\ of outcome } E_0=E \text{ is } \Tr E\rho_0;\\
+&\text{True state } \rho_1 \ (\text{prob. } 1-p):
+&&\text{Prob.\ of outcome } E_1=I-E \text{ is } \Tr(I-E)\rho_1.
+\end{aligned}
+\]
+Total:
+\[
+\boxed{\; P^{\mathrm{corr}} = p\,\Tr E\rho_0 + (1-p)\,\Tr(I-E)\rho_1. \;}
+\]
+We want to choose an $E$, given $\{p,\rho_0,\rho_1\}$, that maximizes
+$P^{\mathrm{corr}}$ --- an optimization problem.
+
+\item Now expand and rearrange; we get something similar to the classical case:
+\begin{align*}
+P^{\mathrm{corr}}
+&= p\,\Tr E\rho_0 + (1-p)\,\Tr(I-E)\rho_1\\
+&= p\,\Tr E\rho_0 + (1-p)\big[\Tr\rho_1 - \Tr E\rho_1\big]\\
+&= p\,\Tr E\rho_0 + \Tr\rho_1 - \Tr E\rho_1 - p\,\Tr\rho_1 + p\,\Tr E\rho_1\\
+&= p\,\Tr E\rho_0 + (1-p) - (1-p)\,\Tr E\rho_1\\
+&= (1-p) + \Tr E\big(p\rho_0 - (1-p)\rho_1\big).
+\end{align*}
+So
+\[
+\boxed{\; P^{\mathrm{corr}} = (1-p) + \Tr E\big(p_0\rho_0 - p_1\rho_1\big) \;}
+\xrightarrow{\ p=1/2\ }
+\frac12 + \frac12\,\Tr E(\rho_0-\rho_1),
+\]
+compare with the classical
+$\ \tfrac12 + \tfrac12\sum_x|p(x)-q(x)| = \tfrac12 + \tfrac12\onenorm{p-q}$.
+\end{enumerate}
+
+Define the \emph{Helstrom operator}
+\[
+\boxed{\; \Delta = p_0\rho_0 - (1-p)\rho_1 = p_0\rho_0 - p_1\rho_1, \;}
+\]
+which encodes the \emph{known} problem information. So
+\[
+\boxed{\; P^{\mathrm{corr}} = 1-p + \Tr E\Delta \;}
+\quad\longrightarrow\quad
+\text{for the given }\Delta,\ \text{adjust } E \text{ with } 0\le E\le I
+\text{ to maximize } P^{\mathrm{corr}}.
+\]
+Note we are optimizing over an operator (matrix) in an expression involving a
+trace, under the psd constraints $0\le E\le I$.
+
+%===============================================================
+\section{The Optimization Problem}
+%===============================================================
+
+For given $\Delta = p_0\rho_0 - p_1\rho_1$, find
+\[
+\boxed{\; E^{*} = \argmax_{0\le E\le I}\ \Tr E\Delta, \;}
+\]
+where $0\le E\le I$ means all eigenvalues of $E$ lie in $[0,1]$.
+
+We know $\rho_0,\rho_1$ are psd (all eigenvalues $\lambda\ge 0$) and
+$\Tr\rho_0=\Tr\rho_1=1$. But the weighted difference $p_0\rho_0-p_1\rho_1$ is
+still Hermitian, yet not necessarily psd (some eigenvalues $<0$ are possible).
+
+Suppose we set $E=I$. Then
+\[
+\Tr I\Delta = \Tr\Delta = \sum_i \delta_i
+\qquad(\delta_i = \text{eigenvalues of }\Delta).
+\]
+Generally some $\delta_i>0$ and some $\delta_i<0$, so the sum will be at least
+partially decreased by the negative $\delta_i$.
+
+\begin{quote}
+\textbf{Main idea:} choose $E$ as a \emph{projector onto only the positive
+eigenvalue subspace} of $\Delta$. Then $\Tr E\Delta$ will sum only positive
+values. Design $E$ to maximize this.
+\end{quote}
+
+%---------------------------------------------------------------
+\subsection{The optimal $E$}
+%---------------------------------------------------------------
+
+\paragraph{Claim.}
+Eigendecompose $\Delta$:
+\[
+\Delta = \sum_i \delta_i\,\ket{i}\!\bra{i}
+= \sum_j \delta_j^{+}\,\ket{j^{+}}\!\bra{j^{+}}
++ \sum_k \delta_k^{-}\,\ket{k^{-}}\!\bra{k^{-}},
+\]
+where $\{\delta_j^{+}\}$ are the positive eigenvalues and $\{\delta_k^{-}\}$
+are the zero or negative eigenvalues. So $\Delta=\Delta_{+}+\Delta_{-}$ with
+\[
+\Delta_{+} = \sum_j \delta_j^{+}\,\ket{j^{+}}\!\bra{j^{+}},
+\qquad
+\Delta_{-} = \sum_k \delta_k^{-}\,\ket{k^{-}}\!\bra{k^{-}}.
+\]
+Then
+\[
+\boxed{\; E^{*} = \sum_j \ket{j^{+}}\!\bra{j^{+}} \equiv \Pi_{+}, \;}
+\]
+a projection onto the positive eigenspace of $\Delta$.
+
+\paragraph{Why.}
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*]
+\item \emph{Notation.}
+\begin{enumerate}[label=(\roman*), nosep]
+  \item $A>0$ means, for all unit $v$, $\ \braket{v|A|v}>0 \quad \forall v$.
+  \item $A<I$ means, for all $v$ with $|v|=1$,
+  \[
+  A-I<0 \ \Longrightarrow\ \braket{v|A-I|v}<0
+  \ \Longrightarrow\ \braket{v|A|v} - \underbrace{\braket{v|v}}_{1} < 0
+  \ \Longrightarrow\ \braket{v|A|v}<1 \quad\forall v.
+  \]
+\end{enumerate}
+
+\item \emph{Upper bound.}
+We have $\Delta=\sum_i\delta_i\ket{i}\!\bra{i}$, so
+\[
+\Tr E\Delta
+= \Tr E\Big(\sum_i\delta_i\ket{i}\!\bra{i}\Big)
+= \sum_i \delta_i\,\Tr\big(E\ket{i}\!\bra{i}\big)
+= \sum_i \delta_i\,\braket{i|E|i}.
+\]
+We know (i) $0\le\braket{i|E|i}\le 1$ and (ii) some $\delta_i>0$, some
+$\delta_i\le 0$. We can maximize this sum term by term by setting
+\[
+\braket{i|E|i}=1 \ \text{for } \delta_i>0,
+\qquad
+\braket{i|E|i}=0 \ \text{for } \delta_i\le 0.
+\]
+(We don't know yet that this is achievable, but it does set an upper bound.)
+Therefore
+\[
+\boxed{\; \Tr E\Delta \le \sum_i \delta_i^{+} = \Tr\Delta_{+}. \;}
+\]
+
+\item \emph{Achievability.}
+This bound is achieved by setting
+\[
+\boxed{\; E^{*} = \sum_j \ket{j^{+}}\!\bra{j^{+}} \equiv \Pi_{+}. \;}
+\]
+Why? Because
+\begin{align*}
+\Tr E^{*}\Delta
+&= \Tr\Big(\sum_j \ket{j^{+}}\!\bra{j^{+}}\cdot\sum_i\delta_i\ket{i}\!\bra{i}\Big)
+= \Tr\sum_{j,i}\delta_i\,\ket{j^{+}}\!\underbrace{\braket{j^{+}|i}}_{\delta_{j^{+}i}}\!\bra{i}\\
+&= \sum_i \delta_i^{+} = \Tr\Delta_{+}.
+\end{align*}
+Hence the optimal POVM element is
+\[
+\boxed{\; E^{*} = \sum_i \ket{i^{+}}\!\bra{i^{+}}. \;}
+\]
+\end{enumerate}
+
+%===============================================================
+\section{The Probability of Success}
+%===============================================================
+
+Now look at $p^{\mathrm{succ}}$. For $\Delta = p_0\rho_0 - p_1\rho_1$,
+\[
+p^{\mathrm{succ}} = 1-p + \Tr E^{*}\Delta = 1-p + \Tr\Delta_{+}.
+\]
+Now
+\[
+\Tr\Delta_{+} = \sum_{i:\,\delta_i>0}\delta_i
+= \frac12\!\left(\sum_i|\delta_i| + \sum_i\delta_i\right)
+= \frac12\big(\onenorm{\Delta} + \Tr\Delta\big),
+\]
+and
+\[
+\Tr\Delta = \Tr\big(p\rho_0 - (1-p)\rho_1\big)
+= p\,\Tr\rho_0 - (1-p)\,\Tr\rho_1
+= p - (1-p) = 2p-1,
+\]
+so that
+\[
+\Tr\Delta_{+} = \frac12\big(\onenorm{\Delta} + 2p-1\big).
+\]
+Therefore
+\[
+p^{\mathrm{succ}}
+= 1-p + \frac12\onenorm{\Delta} + p - \frac12
+= \frac12\big(1 + \onenorm{\Delta}\big).
+\]
+So the optimal probability of success in binary discrimination is
+\[
+\boxed{\;
+p^{\mathrm{succ}} = \frac12\Big(1 + \onenorm{\,p\rho_0 + (1-p)\rho_1\,}\Big).
+\;}
+\]
+
+\paragraph{Comparison to the classical $p=\tfrac12$ case.}
+\[
+\boxed{\;
+p^{\mathrm{succ}} = \frac12\!\left(1 + \frac12\onenorm{p-q}\right)
+\;}
+\qquad\text{(classical),}
+\]
+\[
+\boxed{\;
+p^{\mathrm{succ}} = \frac12\!\left(1 + \frac12\onenorm{\rho_0-\rho_1}\right)
+\;}
+\qquad\text{(quantum).}
+\]
+
+%===============================================================
+\section{Quantum Trace Distance of States}
+%===============================================================
+
+(For $p=\tfrac12$.) Define
+\[
+T(\rho,\sigma) = \frac12\onenorm{\rho-\sigma},
+\qquad \onenorm{A}\equiv\sum_i|\lambda_i|,
+\]
+alongside the classical
+\[
+TV(p,q) = \frac12\onenorm{p-q},
+\qquad \onenorm{f}\equiv\sum_x|f(x)|.
+\]
+
+\paragraph{Same general properties.}
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*]
+  \item Both are proper metric distances.
+  \item Minimum $0$: $\ \rho=\sigma \iff T=0 \ \rightarrow\ p^{\mathrm{succ}}=\tfrac12$.
+  \item Maximum $1$: $\ \rho,\sigma$ perfectly distinguishable with
+        $p^{\mathrm{succ}}=1$.
+  \item Perfect distinguishability also has a disjointness requirement.
+\end{enumerate}
+
+\paragraph{Perfect distinguishability.}
+One can show that for $T(\rho,\sigma)=1$:
+\[
+\begin{aligned}
+&\text{(1) for } \delta_i>0:\ \braket{i|\sigma|i}=0,\\
+&\text{(2) for } \delta_i<0:\ \braket{i|\rho|i}=0.
+\end{aligned}
+\]
+Or, equivalently:
+\begin{enumerate}[label=(\arabic*), nosep]
+  \item all positive eigenvectors of $\rho-\sigma$ belong to the image of $\rho$;
+  \item all negative eigenvectors of $\rho-\sigma$ belong to the image of $\sigma$.
+\end{enumerate}
+
+\end{document}

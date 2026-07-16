@@ -1,0 +1,365 @@
+\documentclass[11pt]{article}
+
+% ----- Packages -----
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{braket}          % \ket, \bra, \braket, \ketbra
+\usepackage{mathtools}
+\usepackage{bm}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!55!black, urlcolor=blue!55!black}
+
+% ----- Convenience macros -----
+\newcommand{\Tr}{\operatorname{Tr}}
+\newcommand{\onenorm}[1]{\left\lVert #1 \right\rVert_{1}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+
+\title{\textbf{Quantum Information Theory}\\[4pt]
+Fidelity of Quantum States:\\
+An Introduction to Uhlmann's Theorem}
+\author{}
+\date{Talk 3 --- July 9, 2026}
+
+\begin{document}
+\maketitle
+
+%===============================================================
+\section*{Review}
+%===============================================================
+
+\textbf{Classical discrimination} of a classical random variable $x$ drawn
+from one of the pdf's $p(x)$ or $q(x)$.
+Rule: given observation $x$, choose the greater of
+\[
+\begin{cases}
+p(x) \longrightarrow x\sim p,\\[2pt]
+q(x) \longrightarrow x\sim q,
+\end{cases}
+\qquad
+\Big(\text{gives maximum prob.\ of success}\Big).
+\]
+
+\textbf{Quantum discrimination} between two mixed states $\rho,\sigma$: we
+designed the optimal POVM $\{E,\,I-E\}$. The probability of successful guessing
+in both cases is
+\[
+P^{\mathrm{succ}}_{\mathrm{classical}}
+= \frac12\!\left(1 + \frac12\onenorm{p-q}\right),
+\qquad
+P^{\mathrm{succ}}_{\mathrm{quantum}}
+= \frac12\!\left(1 + \frac12\onenorm{\rho-\sigma}\right),
+\]
+where
+\[
+\onenorm{A} = \sum_i |\lambda_i(A)| = \Tr\sqrt{A^{\dagger}A}.
+\]
+We defined the \emph{trace distance} between states $\rho$ and $\sigma$,
+\[
+T(\rho,\sigma) = \frac12\onenorm{\rho-\sigma},
+\]
+which is an operational definition in terms of a classification task, and also
+a nice mathematical definition with an interpretation as a proper metric. Other
+operational definitions are possible and useful in their own particular
+applications.
+
+\medskip
+\noindent\textbf{Today we look at fidelity, $F(\rho,\sigma)$, between two
+states.}
+
+%===============================================================
+\section{Fidelity as a Generalization of Overlap}
+%===============================================================
+
+Fidelity is a generalization of the overlap between two pure states,
+$\braket{\psi|\phi}$; we want something similar for mixed states.
+
+\paragraph{Claim.}
+For pure states there is a direct relation between overlap and
+distinguishability:
+\[
+\braket{\psi|\phi}\ \sim\
+\frac12\onenorm{\,\ket{\psi}\!\bra{\psi} - \ket{\phi}\!\bra{\phi}\,}
+\qquad(\text{not equal!}).
+\]
+
+\paragraph{Why.}
+Take the $2$-dimensional subspace spanned by $\ket{\psi}$ and $\ket{\phi}$.
+Take basis vector $\ket{e_1}\equiv\ket{\psi}$ and any orthonormal $\ket{e_2}$.
+Then
+\[
+\ket{\psi} = \begin{pmatrix}1\\0\end{pmatrix},
+\qquad
+\ket{\phi} = \cos\theta\,\ket{e_1} + \sin\theta\,\ket{e_2}
+= \begin{pmatrix}\cos\theta\\ \sin\theta\end{pmatrix},
+\quad\text{where } \braket{\psi|\phi} = \cos\theta.
+\]
+So, writing $c=\cos\theta$ and $s=\sin\theta$,
+\begin{align*}
+\ket{\psi}\!\bra{\psi} - \ket{\phi}\!\bra{\phi}
+&= \begin{pmatrix}1\\0\end{pmatrix}\!\begin{pmatrix}1&0\end{pmatrix}
+- \begin{pmatrix}c\\s\end{pmatrix}\!\begin{pmatrix}c&s\end{pmatrix}\\[4pt]
+&= \begin{pmatrix}1&0\\0&0\end{pmatrix}
+- \begin{pmatrix}c^{2}&cs\\ cs&s^{2}\end{pmatrix}
+= \begin{pmatrix}s^{2}&-cs\\ -cs&-s^{2}\end{pmatrix},
+\end{align*}
+and we need $\sum_{i=1}^{2}|\lambda_i|$ of its eigenvalues.
+
+Recall the characteristic equation for a $2\times 2$ matrix,
+$\lambda^{2} - \Tr(A)\,\lambda + \det(A) = 0$. Here $\Tr = 0$ and
+\[
+\det = -s^{4} - c^{2}s^{2} = -s^{2}(s^{2}+c^{2}) = -\sin^{2}\theta,
+\]
+so
+\[
+\lambda^{2} - \sin^{2}\theta = 0
+\quad\Longrightarrow\quad
+\lambda = \pm\sin\theta.
+\]
+Therefore $|\lambda_1| + |\lambda_2| = 2\sin\theta$, and
+\[
+\boxed{\;
+\frac12\onenorm{\,\ket{\psi}\!\bra{\psi} - \ket{\phi}\!\bra{\phi}\,}
+= \sin\theta = T(\ket{\psi},\ket{\phi}),
+\qquad
+\text{but}\quad |\!\braket{\psi|\phi}\!|^{2} = \cos^{2}\theta.
+\;}
+\]
+This is a simple $1{:}1$ relation for pure states. This
+\emph{squared-overlap} is what we call fidelity for pure states.
+
+%===============================================================
+\section{General Definition of Fidelity}
+%===============================================================
+
+For two mixed states $\rho,\sigma$ in general,
+\[
+\boxed{\; F(\rho,\sigma) = \onenorm{\sqrt{\rho}\,\sqrt{\sigma}}^{\,2}. \;}
+\]
+
+%---------------------------------------------------------------
+\subsection{Recovering the pure-state definition}
+%---------------------------------------------------------------
+
+\paragraph{Claim.}
+This recovers the pure-state definition above: $\cos^{2}\theta$.
+
+\paragraph{Proof.}
+Take $\rho=\ket{\psi}\!\bra{\psi}$ and $\sigma=\ket{\phi}\!\bra{\phi}$; we want
+to show $\onenorm{\sqrt{\rho}\,\sqrt{\sigma}}^{\,2} = |\!\braket{\psi|\phi}\!|^{2}$.
+Note that for a rank-arbitrary projection such as $\Pi=\ket{\psi}\!\bra{\psi}$
+we have $\Pi^{2}=\Pi$, hence $\Pi=\sqrt{\Pi}$. So
+\begin{align*}
+F(\psi,\phi)
+&= \onenorm{\sqrt{\ket{\psi}\!\bra{\psi}}\,\sqrt{\ket{\phi}\!\bra{\phi}}}^{\,2}
+= \onenorm{\,\ket{\psi}\!\bra{\psi}\,\ket{\phi}\!\bra{\phi}\,}^{\,2}\\[4pt]
+&= \onenorm{\,\underbrace{\braket{\psi|\phi}}_{\in\,\C}\,\ket{\psi}\!\bra{\phi}\,}^{\,2}
+= |\!\braket{\psi|\phi}\!|^{2}\,\onenorm{\,\ket{\psi}\!\bra{\phi}\,}^{\,2},
+\end{align*}
+using $\onenorm{cA} = |c|\,\onenorm{A}$. It remains to show the last one-norm
+equals $1$.
+
+\medskip
+\noindent\emph{One-norm of the rank-one operator $\ket{\psi}\!\bra{\phi}$.}
+Take $X=\ket{\psi}\!\bra{\phi}$, so $\onenorm{X}=\Tr\sqrt{X^{\dagger}X}$ from
+the definition. Then
+\[
+X^{\dagger}X = \ket{\phi}\!\underbrace{\braket{\psi|\psi}}_{=\,1}\!\bra{\phi}
+= \ket{\phi}\!\bra{\phi},
+\]
+and since $\ket{\phi}\!\bra{\phi}$ is a rank-one projection,
+$\sqrt{X^{\dagger}X}=\ket{\phi}\!\bra{\phi}$. Therefore
+\[
+\Tr\sqrt{X^{\dagger}X} = \Tr\ket{\phi}\!\bra{\phi} = \Tr\braket{\phi|\phi}
+= \Tr 1 = 1
+\quad\Longrightarrow\quad
+\onenorm{\,\ket{\psi}\!\bra{\phi}\,} = 1.
+\]
+Hence
+\[
+\boxed{\; F(\ket{\psi},\ket{\phi}) = |\!\braket{\psi|\phi}\!|^{2}, \;}
+\]
+as expected. \hfill$\square$
+
+%---------------------------------------------------------------
+\subsection{Fidelity of a pure and a mixed state}
+%---------------------------------------------------------------
+
+\paragraph{Claim.}
+$F(\ket{\psi},\rho) = \braket{\psi|\rho|\psi}$.
+
+\paragraph{Proof.}
+With $\Pi=\ket{\psi}\!\bra{\psi}$,
+\[
+F(\psi,\rho)
+= \onenorm{\sqrt{\ket{\psi}\!\bra{\psi}}\,\sqrt{\rho}}^{\,2}
+= \onenorm{\,\ket{\psi}\!\bra{\psi}\,\sqrt{\rho}\,}^{\,2}
+= \onenorm{\Pi\sqrt{\rho}}^{\,2}
+\qquad(\Pi\text{ a projection}).
+\]
+Using $\onenorm{A}=\Tr\sqrt{AA^{\dagger}}$,
+\[
+\onenorm{\Pi\sqrt{\rho}}
+= \Tr\sqrt{\Pi\sqrt{\rho}\,\sqrt{\rho}\,\Pi}
+= \Tr\sqrt{\Pi\rho\Pi}.
+\]
+Now
+\[
+\Pi\rho\Pi = \ket{\psi}\!\bra{\psi}\rho\ket{\psi}\!\bra{\psi}
+= \underbrace{\braket{\psi|\rho|\psi}}_{\in\,\C}\,\ket{\psi}\!\bra{\psi},
+\]
+so
+\[
+\Tr\sqrt{\Pi\rho\Pi}
+= \sqrt{\braket{\psi|\rho|\psi}}\;\Tr\sqrt{\ket{\psi}\!\bra{\psi}}
+= \sqrt{\braket{\psi|\rho|\psi}}\;\underbrace{\Tr\ket{\psi}\!\bra{\psi}}_{=\,1}
+= \sqrt{\braket{\psi|\rho|\psi}}.
+\]
+Thus $\onenorm{\Pi\sqrt{\rho}} = \sqrt{\braket{\psi|\rho|\psi}}$, and
+\[
+\boxed{\; F(\psi,\rho) = \braket{\psi|\rho|\psi}. \;}
+\]
+\hfill$\square$
+
+%---------------------------------------------------------------
+\subsection{Operational interpretation}
+%---------------------------------------------------------------
+
+Both cases have a similar operational interpretation as the probability of a
+measurement outcome for the POVM $\{\ket{\psi}\!\bra{\psi},\; I-\ket{\psi}\!\bra{\psi}\}$:
+\[
+\begin{aligned}
+F(\psi,\phi) &= |\!\braket{\psi|\phi}\!|^{2}
+&&= \text{prob.\ of outcome } \psi \text{ when given state } \ket{\phi};\\
+F(\psi,\rho) &= \braket{\psi|\rho|\psi}
+&&= \text{prob.\ of outcome } \psi \text{ when given state } \rho.
+\end{aligned}
+\]
+
+%===============================================================
+\section{Mixed States}
+%===============================================================
+
+For two mixed states,
+\[
+F(\rho,\sigma) = \onenorm{\sqrt{\rho}\,\sqrt{\sigma}}^{\,2}.
+\]
+
+%---------------------------------------------------------------
+\subsection{Commuting operators}
+%---------------------------------------------------------------
+
+For commuting operators it is easy to show
+\[
+F(\rho,\sigma) = \left(\sum_i \sqrt{p_i\,q_i}\right)^{2},
+\]
+where $p_i$ are the eigenvalues of $\rho$ and $q_i$ are the eigenvalues of
+$\sigma$. This is the Bhattacharyya distance of the classical probability
+distributions $\{p_i\},\{q_i\}$.
+
+%---------------------------------------------------------------
+\subsection{Non-commuting mixed states}
+%---------------------------------------------------------------
+
+How do we measure an ``overlap'' of mixed states? Recall the
+\emph{purification} of mixed states. Take a mixed state $\rho_A$ on a system
+$A$; add a reference system $R$ and produce a \emph{pure state}
+$\ket{\psi}_{RA}$ on the joint system $RA$ such that discarding (tracing out)
+$R$ on the joint state produces $\rho_A$:
+\[
+\rho_A \xrightarrow{\ \text{purification}\ } \ket{\psi}_{RA}
+\qquad\text{s.t.}\qquad
+\Tr_R \ket{\psi}_{RA}\!\bra{\psi}_{RA} = \rho_A.
+\]
+Do this purification on both $\rho$ and $\sigma$, giving
+$\rho\to\ket{\psi_\rho}$ and $\sigma\to\ket{\psi_\sigma}$. Try
+\[
+F(\sigma_A,\rho_A) \overset{?}{=} |\!\braket{\psi_\rho|\psi_\sigma}\!|^{2}.
+\]
+Not quite! It turns out this is \emph{not unique} --- but there \emph{is} a
+unique maximum. So
+\[
+\boxed{\;
+F(\rho_A,\sigma_A) = \onenorm{\sqrt{\rho}\,\sqrt{\sigma}}^{\,2}
+\quad\text{(by definition)}
+\qquad\text{ALSO}\qquad
+= \max_{\text{purifications}} |\!\braket{\psi_\rho|\psi_\sigma}\!|^{2}.
+\;}
+\]
+\textbf{This is Uhlmann's Theorem.}
+
+%===============================================================
+\section{Review of Purification}
+%===============================================================
+
+Recall: (1) a pure state $\ket{\psi}$; and (2) a mixed state $\rho$ with
+$\rho\ge 0$ and $\Tr\rho=1$.
+
+We can view a mixed state $\rho_A$ on a Hilbert space $A$ as arising from a
+pure state $\ket{\psi_\rho}_{RA}$ on an extended Hilbert space $R\otimes A$,
+\[
+\rho_{RA} = \ket{\psi_\rho}_{RA}\!\bra{\psi_\rho}_{RA},
+\]
+then discarding system $R$ and keeping only $A$. Here $\ket{\psi}_{RA}$ is the
+\emph{purification} of $\rho_A$. This is \emph{not unique}: infinitely many
+different $\ket{\psi_\rho}_{RA}$ give the same $\rho_A$ after discarding $R$.
+
+%---------------------------------------------------------------
+\subsection{Construction}
+%---------------------------------------------------------------
+
+Given $\rho_A$, take its eigendecomposition
+$\rho_A = \sum_i p_i\,\ket{e_i}\!\bra{e_i}$, and define
+\[
+\boxed{\;
+\ket{\psi_\rho}_{RA} = \sum_i \sqrt{p_i}\,\ket{i}_R\,\ket{e_i}_A,
+\;}
+\]
+where $\ket{i}_R$ is an arbitrary orthonormal basis in another Hilbert space
+with $\dim(R)=\dim(A)$.
+
+\paragraph{Check.}
+Trace out system $R$ by applying $\Tr_R \otimes I_A$ (trace on $R$, identity on
+$A$) to $\ket{\psi_\rho}_{RA}\!\bra{\psi_\rho}_{RA}$:
+\begin{align*}
+\Tr_R \sum_{i,j} \sqrt{p_i p_j}\,\ket{i}\!\bra{j}_R \otimes \ket{e_i}\!\bra{e_j}
+&= \sum_{i,j} \sqrt{p_i p_j}\,
+\underbrace{\Tr\!\big(\ket{i}\!\bra{j}_R\big)}_{=\,\delta_{ij}}
+\otimes \ket{e_i}\!\bra{e_j}\\
+&= \sum_i p_i\,\ket{e_i}\!\bra{e_i} = \rho_A. \qquad\checkmark
+\end{align*}
+
+%---------------------------------------------------------------
+\subsection{Non-uniqueness and Uhlmann's theorem}
+%---------------------------------------------------------------
+
+Purifications are \emph{not unique}. In
+\[
+\ket{\psi_\rho}_{RA} = \sum_i \sqrt{p_i}\,\ket{i}_R \otimes \ket{e_i}_A,
+\]
+the $\ket{e_i}$ form an ONB on $A$ (eigenvectors of $\rho_A$) while $\ket{i}_R$
+is an arbitrary ONB on another Hilbert space. We are free to rotate the ONB on
+$R$ with a unitary $U_R$: that is, $(U_R\otimes I_A)\ket{\psi_\rho}_{RA}$ is
+also a purification for $\rho_A$, given a purification $\ket{\psi_\rho}_{RA}$.
+
+\paragraph{Relation to fidelity between states $\rho$ and $\sigma$.}
+Given purifications $\rho_A\to\ket{\psi_\rho}_{RA}$ and
+$\sigma_A\to\ket{\psi_\sigma}_{RA}$, we can define \emph{a} fidelity between
+$\rho$ and $\sigma$ as the overlap of the purifications,
+$|\!\braket{\psi_\rho|\psi_\sigma}\!|^{2}$. Define \emph{the} fidelity between
+$\rho$ and $\sigma$ as
+\[
+\boxed{\;
+F(\rho,\sigma) = \max_{\text{purifications}}
+|\!\braket{\psi_\rho|\psi_\sigma}\!|^{2}.
+\;}
+\]
+One then shows this also equals $\onenorm{\sqrt{\rho}\,\sqrt{\sigma}}^{\,2}$ ---
+with no optimization procedure required, via a direct calculation.
+
+\medskip
+\noindent\textbf{This is Uhlmann's Theorem.}
+
+\end{document}
