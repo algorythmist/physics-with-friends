@@ -1,3 +1,4 @@
+scipy
 einsteinpy
 pygame
 jupyter

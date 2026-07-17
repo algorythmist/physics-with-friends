@@ -1,0 +1,436 @@
+\documentclass[11pt]{article}
+
+% ----- Packages -----
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{braket}          % \ket, \bra, \braket, \ketbra
+\usepackage{mathtools}
+\usepackage{bm}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!55!black, urlcolor=blue!55!black}
+
+% ----- Convenience macros -----
+\newcommand{\Tr}{\operatorname{Tr}}
+\newcommand{\onenorm}[1]{\left\lVert #1 \right\rVert_{1}}
+\newcommand{\supp}{\operatorname{supp}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\HS}{\mathcal{H}}
+\newcommand{\Uni}{\mathcal{U}}
+
+\title{\textbf{Quantum Information Theory}\\[4pt]
+Uhlmann's Theorem\\[2pt]
+\large (with a Summary of the Relevant Properties of Fidelity)}
+\author{}
+\date{Talk 4 --- July 16, 2026}
+
+\begin{document}
+\maketitle
+
+%===============================================================
+\part*{Part I --- Summary of the Relevant Properties of Fidelity}
+%===============================================================
+
+We use the squared-fidelity convention
+\[
+F(\rho,\sigma) = \onenorm{\sqrt{\rho}\,\sqrt{\sigma}}^{\,2},
+\qquad\text{with root fidelity}\qquad
+\sqrt{F(\rho,\sigma)} = \onenorm{\sqrt{\rho}\,\sqrt{\sigma}},
+\]
+versus the trace distance
+\[
+T(\rho,\sigma) = \frac12\onenorm{\rho-\sigma}.
+\]
+Fidelity is a normalized measure of similarity, with larger values representing
+greater overlap.
+
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*, itemsep=6pt]
+
+\item \textbf{Boundedness.}
+\[
+0 \le F(\rho,\sigma) \le 1.
+\]
+
+\item \textbf{Equality condition.}
+\[
+F(\rho,\sigma) = 1 \iff \rho = \sigma.
+\]
+Two normalized quantum states have maximum fidelity exactly when they are the
+same state.
+
+\item \textbf{Orthogonality condition.}
+\[
+F(\rho,\sigma) = 0 \iff \supp(\rho)\perp\supp(\sigma).
+\]
+Fidelity vanishes exactly when the states have orthogonal supports and are
+therefore perfectly distinguishable. Here $\supp(\rho)=(\ker\rho)^{\perp}$ is
+the linear subspace on which $\rho$ maps to nonzero vectors; its dimension is
+the rank of $\rho$.
+
+\item \textbf{Symmetry.}
+\[
+F(\rho,\sigma) = F(\sigma,\rho).
+\]
+Fidelity does not depend on the order in which the two states are compared.
+
+\item \textbf{Pure-state formula.}
+\[
+F(\ket{\psi},\ket{\phi}) = |\!\braket{\psi|\phi}\!|^{2}.
+\]
+Fidelity reduces to the ordinary squared overlap (transition probability)
+between the two state vectors.
+
+\item \textbf{Pure--mixed formula.}
+If one state is pure, then
+\[
+F(\ket{\psi},\rho) = \braket{\psi|\rho|\psi}.
+\]
+This is the probability that $\rho$ passes the projective test for being the
+target state $\ket{\psi}$.
+
+\item \textbf{Commuting (classical) case.}
+If $\rho$ and $\sigma$ share an eigenbasis,
+\[
+\rho = \sum_x p_x\,\ket{x}\!\bra{x},
+\qquad
+\sigma = \sum_x q_x\,\ket{x}\!\bra{x},
+\]
+then
+\[
+F(\rho,\sigma) = \left(\sum_x \sqrt{p_x\,q_x}\right)^{2}.
+\]
+Quantum fidelity reduces to the square of the classical Bhattacharyya overlap
+when the states commute.
+
+\item \textbf{Uhlmann's theorem.}
+\[
+F(\rho,\sigma) = \max_{\substack{\ket{\psi_\rho},\,\ket{\psi_\sigma}\\ \text{purifications of }\rho,\sigma}}
+|\!\braket{\psi_\rho|\psi_\sigma}\!|^{2}.
+\]
+Fidelity is the largest possible squared overlap between purifications of the
+two mixed states. \emph{(Proved in Part II.)}
+
+\item \textbf{Unitary and isometric invariance.}
+For every unitary or isometry $V$,
+\[
+F(V\rho V^{\dagger},\,V\sigma V^{\dagger}) = F(\rho,\sigma).
+\]
+Reversible embeddings and unitary evolution preserve fidelity exactly.
+
+\item \textbf{Multiplicativity under tensor products.}
+\[
+F(\rho_1\otimes\rho_2,\ \sigma_1\otimes\sigma_2)
+= F(\rho_1,\sigma_1)\,F(\rho_2,\sigma_2).
+\]
+The fidelity of product states is the product of the fidelities of their
+individual components.
+
+\item \textbf{Monotonicity under quantum channels.}
+For every quantum channel $\mathcal{N}$,
+\[
+F\!\big(\mathcal{N}(\rho),\,\mathcal{N}(\sigma)\big) \ge F(\rho,\sigma).
+\]
+Applying the same physical process to both states cannot decrease their
+fidelity; noise can make states more similar.
+
+\item \textbf{Monotonicity under partial trace.}
+For bipartite states, with $\rho_A=\Tr_B\rho_{AB}$ and $\sigma_A=\Tr_B\sigma_{AB}$,
+\[
+F(\rho_A,\sigma_A) \ge F(\rho_{AB},\sigma_{AB}).
+\]
+Discarding a subsystem cannot decrease fidelity, because it removes potentially
+distinguishing information.
+
+\item \textbf{Behaviour under measurements.}
+For a POVM $\{\Lambda_k\}_k$ define $p_k=\Tr(\Lambda_k\rho)$ and
+$q_k=\Tr(\Lambda_k\sigma)$. Then
+\[
+\sum_k \sqrt{p_k\,q_k} \ge \sqrt{F(\rho,\sigma)}.
+\]
+Every measurement produces classical distributions whose overlap is at least
+the root fidelity of the original quantum states.
+
+\item \textbf{Fuchs--van de Graaf inequalities.}
+With trace distance $T(\rho,\sigma)=\tfrac12\onenorm{\rho-\sigma}$,
+\[
+1 - \sqrt{F(\rho,\sigma)} \ \le\ T(\rho,\sigma) \ \le\ \sqrt{1 - F(\rho,\sigma)}.
+\]
+
+\item \textbf{Exact pure-state relation with trace distance.}
+For pure states,
+\[
+T(\ket{\psi},\ket{\phi}) = \sqrt{1 - F(\ket{\psi},\ket{\phi})}.
+\]
+Fidelity and trace distance define compatible notions of closeness and allow
+estimates in one measure to be converted into estimates in the other; for pure
+states they determine one another exactly.
+
+\item \textbf{Purified distance.}
+\[
+P(\rho,\sigma) = \sqrt{1 - F(\rho,\sigma)}.
+\]
+Purified distance converts fidelity into a genuine distance that behaves
+especially well with purifications and approximate quantum states.
+
+\item \textbf{Contraction of purified distance under channels.}
+\[
+P\!\big(\mathcal{N}(\rho),\,\mathcal{N}(\sigma)\big) \le P(\rho,\sigma).
+\]
+Physical processing cannot increase purified distance, just as it cannot
+increase trace distance.
+
+\item \textbf{Fidelity itself is not a metric.}
+Fidelity is a similarity measure rather than a distance: identical states have
+fidelity $1$, and fidelity itself does not satisfy the usual metric axioms such
+as the triangle inequality.
+
+\end{enumerate}
+
+\clearpage
+
+%===============================================================
+\part*{Part II --- Uhlmann's Theorem}
+%===============================================================
+
+We have the definition of (squared) fidelity between two states on $A$,
+\[
+F(\rho,\sigma) = \onenorm{\sqrt{\rho}\,\sqrt{\sigma}}^{\,2},
+\]
+and we want to prove that, equivalently,
+\[
+F(\rho_A,\sigma_A) = \max_{\text{purifications}} |\!\braket{\psi_\rho|\psi_\sigma}\!|^{2},
+\]
+where the maximum is over all purifications $\ket{\psi_\rho}_{RA}$ of $\rho_A$
+and $\ket{\psi_\sigma}_{RA}$ of $\sigma_A$, with an extended reference system
+$R\otimes A$ and $\dim R = \dim A$.
+
+\medskip
+\noindent\textbf{Side definitions and identities first:}
+\begin{enumerate}[label=\arabic*), nosep]
+  \item Definition of a maximally entangled state, $\ket{\Gamma}$.
+  \item Identity: $\braket{\Gamma|M_R\otimes N_A|\Gamma} = \Tr(M^{T}N)$.
+  \item Using $\ket{\Gamma}$ to purify states.
+  \item Alternative trace $1$-norm definition:
+        $\ \onenorm{X} = \max_{V:\,V^{\dagger}V=I}|\Tr VX|$.
+\end{enumerate}
+
+%---------------------------------------------------------------
+\section{Maximally entangled state}
+%---------------------------------------------------------------
+
+A maximally entangled state:
+\[
+\ket{\Gamma}_{RA} = \sum_{j=1}^{d} \ket{j}_R\,\ket{j}_A \quad\text{on } R\otimes A,
+\]
+where $\{\ket{j}_R\}_{j=1}^{d}$ and $\{\ket{j}_A\}_{j=1}^{d}$ are arbitrary
+orthonormal bases for $R$ and $A$ respectively. We use the \emph{unnormalized}
+version above as an algebraic tool; properly we should divide by $\sqrt{d}$.
+
+\paragraph{Why ``maximally entangled''?}
+Take the normalized version
+\[
+\ket{\Gamma'}_{RA} = \frac{1}{\sqrt{d}}\sum_j \ket{j}_R\,\ket{j}_A,
+\qquad
+\Big(\text{compare the } d=2 \text{ Bell state } \ket{\Phi^{+}} = \tfrac{1}{\sqrt2}(\ket{00}+\ket{11})\Big).
+\]
+Then
+\begin{align*}
+\ket{\Gamma'}_{RA}\!\bra{\Gamma'}_{RA}
+&= \frac1d\sum_{ij}\ket{j}\ket{j}\bra{i}\bra{i}
+= \frac1d\sum_{ij}\big(\ket{j}_R\otimes\ket{j}_A\big)\big(\bra{i}_R\otimes\bra{i}_A\big)\\
+&= \frac1d\sum_{ij}\ket{j}\!\bra{i}_R \otimes \ket{j}\!\bra{i}_A.
+\end{align*}
+Now trace out system $R$ via $\Tr_R = \Tr\otimes I_A$ (trace on $R$, leave $A$
+alone):
+\[
+(\Tr\otimes I)\ket{\Gamma'}\!\bra{\Gamma'}
+= \frac1d\sum_{ij}\underbrace{\Tr\ket{j}\!\bra{i}_R}_{\delta_{ij}}\otimes\ket{j}\!\bra{i}_A
+= \frac1d\sum_i \ket{i}\!\bra{i}_A
+= \frac1d I_A,
+\]
+and similarly $\Tr_A\ket{\Gamma'}\!\bra{\Gamma'} = \tfrac1d I_R$. So each
+subsystem in isolation is maximally (completely) mixed as a single-particle
+state. This is the definition of maximal entanglement between two systems.
+
+%---------------------------------------------------------------
+\section{The identity \texorpdfstring{$\braket{\Gamma|M_R\otimes N_A|\Gamma}=\Tr(M^{T}N)$}{Gamma identity}}
+%---------------------------------------------------------------
+
+(Note: $M^{T}$ is the transpose, \emph{not} the adjoint $M^{\dagger}$.)
+
+%.......................................................
+\subsection{Transpose trick for \texorpdfstring{$\ket{\Gamma}$}{Gamma}}
+%.......................................................
+
+\[
+\boxed{\;(M\otimes I)\ket{\Gamma} = (I\otimes M^{T})\ket{\Gamma}.\;}
+\]
+Recall $A\ket{j} = \sum_i A_{ij}\ket{i}$; check:
+$\braket{k|A|j} = \sum_i A_{ij}\braket{k|i} = \sum_i A_{ij}\delta_{ki} = A_{kj}$. \checkmark
+
+Now compare both sides:
+\[
+\begin{aligned}
+\text{LHS} &= (M\otimes I)\sum_j \ket{j}\otimes\ket{j}
+= \sum_j M\ket{j}\otimes\ket{j}
+= \sum_{ji} M_{ij}\ket{i}\otimes\ket{j},\\[4pt]
+\text{RHS} &= (I\otimes M^{T})\sum_j \ket{j}\otimes\ket{j}
+= \sum_j \ket{j}\otimes M^{T}\ket{j}
+= \sum_j \ket{j}\otimes\sum_i [M^{T}]_{ij}\ket{i}\\
+&= \sum_j \ket{j}\otimes M_{ji}\ket{i}
+= \sum_{ji} M_{ji}\ket{j}\otimes\ket{i}
+\quad(\text{swap } i\leftrightarrow j).
+\end{aligned}
+\]
+Therefore $\text{LHS}=\text{RHS}$.
+
+%.......................................................
+\subsection{Proving the identity}
+%.......................................................
+
+We want $\braket{\Gamma|(M\otimes N)|\Gamma} = \Tr(M^{T}N)$. Using the transpose
+trick,
+\[
+\braket{\Gamma|M\otimes N|\Gamma}
+= \braket{\Gamma|(M\otimes I)(I\otimes N)|\Gamma}
+= \braket{\Gamma|(I\otimes M^{T})(I\otimes N)|\Gamma}
+= \braket{\Gamma|(I\otimes M^{T}N)|\Gamma}. \tag{$*$}
+\]
+But in general, for any operator $X$ on $A$,
+\[
+\braket{\Gamma|I\otimes X|\Gamma}
+= \sum_i\sum_j \big(\bra{i}\otimes\bra{i}\big)(I\otimes X)\big(\ket{j}\otimes\ket{j}\big)
+= \sum_{ij}\underbrace{\braket{i|j}}_{\delta_{ij}}\braket{i|X|j}
+= \sum_i \braket{i|X|i}
+= \sum_i X_{ii},
+\]
+so that
+\[
+\boxed{\;\braket{\Gamma|I\otimes X|\Gamma} = \Tr X.\;}
+\]
+Applying this to $(*)$ with $X=M^{T}N$,
+\[
+\boxed{\;\braket{\Gamma|M\otimes N|\Gamma} = \Tr(M^{T}N).\;}
+\qquad\checkmark
+\]
+
+%---------------------------------------------------------------
+\section{Using \texorpdfstring{$\ket{\Gamma}$}{Gamma} to purify states}
+%---------------------------------------------------------------
+
+Recall the previous method to purify a $\rho_A$:
+\[
+\rho_A \longrightarrow \ket{\psi_\rho}_{RA} = \sum_i \sqrt{p_i}\,\ket{i}_R\otimes\ket{e_i}_A,
+\]
+with $\ket{i}_R$ an arbitrary ONB of $R$, $\ket{e_i}_A$ the ONB of eigenvectors
+of $\rho_A$, and $p_i$ its eigenvalues.
+
+An \emph{alternative} purification is
+\[
+\boxed{\;\ket{\psi_\rho}_{RA} = (I_R\otimes\sqrt{\rho_A})\ket{\Gamma}_{RA}.\;}
+\]
+\textbf{Check.}
+\begin{align*}
+\ket{\psi_\rho}_{RA}\!\bra{\psi_\rho}_{RA}
+&= (I_R\otimes\sqrt{\rho_A})\ket{\Gamma}\!\bra{\Gamma}(I_R\otimes\sqrt{\rho_A})\\
+&= (I\otimes\sqrt{\rho})\sum_{ij}\ket{i}\ket{i}\bra{j}\bra{j}(I\otimes\sqrt{\rho})\\
+&= \sum_{ij}\ket{i}\!\bra{j}_R \otimes \sqrt{\rho_A}\,\ket{i}\!\bra{j}_A\,\sqrt{\rho_A}.
+\end{align*}
+Trace out $R$:
+\begin{align*}
+(\Tr\otimes I_A)\ket{\psi_\rho}\!\bra{\psi_\rho}
+&= \sum_{ij}\underbrace{\Tr\ket{i}\!\bra{j}}_{\delta_{ij}} \otimes \sqrt{\rho_A}\,\ket{i}\!\bra{j}_A\,\sqrt{\rho_A}\\
+&= \sum_i \sqrt{\rho_A}\,\ket{i}\!\bra{i}\,\sqrt{\rho_A}
+= \sqrt{\rho_A}\,\underbrace{\Big(\sum_i \ket{i}\!\bra{i}\Big)}_{I_A}\,\sqrt{\rho_A}
+= \rho_A. \qquad\checkmark
+\end{align*}
+
+%---------------------------------------------------------------
+\section{Alternative trace \texorpdfstring{$1$}{1}-norm definition}
+%---------------------------------------------------------------
+
+\[
+\onenorm{X} = \max_{\substack{U\ \text{unitary}\\ U^{\dagger}U=I}} |\Tr UX|.
+\]
+Think of this as a generalization of the scalar case for $\C$-numbers. For
+$x\in\C$ and $u\in\C$ on the unit circle ($u=e^{i\theta}$), what is
+$\max_{u=e^{i\theta}}|ux|$?
+\[
+|ux| = |u|\cdot|x| = |x|
+\quad(\text{since } |u|=1\ \forall\, u\in\{e^{i\theta}\})
+\quad\Longrightarrow\quad
+\max_{u=e^{i\theta}}|ux| = |x|\ \text{ trivially.}
+\]
+One can show the operator statement for general operators on $\C^{n}$.
+
+\medskip
+\noindent We now have the pieces necessary to prove Uhlmann's theorem.
+
+%---------------------------------------------------------------
+\section{Proof of Uhlmann's Theorem}
+%---------------------------------------------------------------
+
+Given the fidelity of two states $\rho,\sigma$ on $A$ defined as
+$F(\rho,\sigma) = \onenorm{\sqrt{\rho}\,\sqrt{\sigma}}^{\,2}$, we show
+\[
+F(\rho_A,\sigma_A) = \max_{\text{purifications}}
+|\!\braket{\psi_{\rho_A}|\psi_{\sigma_A}}\!|^{2},
+\qquad
+\rho_A \xrightarrow{\text{ purif }} \ket{\psi_{\rho_A}}_{RA},\quad
+\sigma_A \xrightarrow{\text{ purif }} \ket{\psi_{\sigma_A}}_{RA}.
+\]
+
+%.......................................................
+\subsection{Step 1: choose the \texorpdfstring{$\ket{\Gamma}$}{Gamma} purification}
+%.......................................................
+
+Choose (for now) arbitrary ONBs $\{\ket{i}_A\}$ for system $A$ and
+$\{\ket{i}_R\}$ for reference system $R$, with $\dim R = \dim A$. Define the
+maximally entangled state
+\[
+\ket{\Gamma}_{RA} = \sum_i \ket{i}_R\,\ket{i}_A,
+\]
+and define the purifications
+\[
+\ket{\psi_\rho}_{RA} = (I_R\otimes\sqrt{\rho})\ket{\Gamma}_{RA},
+\qquad
+\ket{\psi_\sigma}_{RA} = (I_R\otimes\sqrt{\sigma})\ket{\Gamma}_{RA}. \tag{$*$}
+\]
+
+%.......................................................
+\subsection{Step 2: reduce max over purifications to max over unitaries}
+%.......................................................
+
+Recall that all possible purifications of a given state are related by unitary
+transformations on the reference system. All possible purifications are given
+by
+\[
+(U_R^{1}\otimes I_A)\ket{\psi_\rho}_{RA},
+\qquad
+(U_R^{2}\otimes I_A)\ket{\psi_\sigma}_{RA},
+\]
+where $U_R^{1},U_R^{2}$ are unitary on $R$; all purifications are obtained by
+varying $U_R^{1},U_R^{2}$ over $\Uni$ (all unitary operators). So all possible
+overlaps of purifications are
+\[
+\braket{\psi_\rho|(U_R^{1\dagger}\otimes I_A)(U_R^{2}\otimes I_A)|\psi_\sigma}
+= \braket{\psi_\rho|(U_R^{1\dagger}U_R^{2}\otimes I_A)|\psi_\sigma}
+= \braket{\psi_\rho|(U_R\otimes I_A)|\psi_\sigma},
+\]
+where $U_R = U_R^{1\dagger}U_R^{2}$ is also unitary. Hence we only have to vary
+the single $U_R$ to get all overlaps, and we can write
+\[
+\boxed{\;
+\max_{\text{purifications}} |\!\braket{\psi_\rho|\psi_\sigma}\!|
+= \max_{U_R\in\Uni} |\!\braket{\psi_\rho|(U_R\otimes I_A)|\psi_\sigma}\!|.
+\;}
+\]
+
+\medskip
+\noindent\emph{[Notes end here --- the remaining steps combine the transpose-trick
+identity of \S2 with the alternative trace-norm definition of \S4 to evaluate
+this maximum as $\onenorm{\sqrt{\rho}\,\sqrt{\sigma}}$, completing the proof.]}
+
+\end{document}
