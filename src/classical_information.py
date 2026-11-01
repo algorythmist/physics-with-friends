@@ -1,6 +1,8 @@
+import numpy as np
+from scipy.integrate import quad
 from sympy.stats import P, E, variance, density, Die, Normal
 from sympy.stats.rv import RandomSymbol
-from sympy import simplify, integrate, Symbol, oo, log, Abs, Expr
+from sympy import simplify, Symbol, log, Abs, Expr, lambdify
 
 
 def _as_pdf(arg, var):
@@ -25,7 +27,7 @@ def kl_divergence(X, Y, var=None):
             Symbol('x') if not given.
 
     Returns:
-        Expr: The KL divergence KL(X || Y) as a sympy expression.
+        float: The KL divergence KL(X || Y), computed via numerical integration.
 
     Raises:
         TypeError: If `X` or `Y` is neither a RandomSymbol nor a sympy Expr.
@@ -33,7 +35,9 @@ def kl_divergence(X, Y, var=None):
     var = var or Symbol('x') # Shared integration variable for both densities
     p_pdf = _as_pdf(X, var)
     q_pdf = _as_pdf(Y, var)
-    return integrate(p_pdf * log(p_pdf / q_pdf), (var, -oo, oo)) # KL(P || Q) = integral of p * log(p/q) over the support
+    integrand = lambdify(var, p_pdf * log(p_pdf / q_pdf), 'numpy') # sympy's symbolic integrate struggled to close-form this, so integrate numerically instead
+    result, _ = quad(integrand, -np.inf, np.inf)
+    return result
 
 
 def l1_distance(X, Y, var=None):
@@ -48,7 +52,7 @@ def l1_distance(X, Y, var=None):
             Symbol('x') if not given.
 
     Returns:
-        Expr: The L1 distance integral(|p(x) - q(x)| dx) as a sympy expression.
+        float: The L1 distance integral(|p(x) - q(x)| dx), computed via numerical integration.
 
     Raises:
         TypeError: If `X` or `Y` is neither a RandomSymbol nor a sympy Expr.
@@ -56,7 +60,9 @@ def l1_distance(X, Y, var=None):
     var = var or Symbol('x')
     p_pdf = _as_pdf(X, var)
     q_pdf = _as_pdf(Y, var)
-    return integrate(Abs(p_pdf - q_pdf), (var, -oo, oo)) # L1 distance = integral of |p - q| over the support
+    integrand = lambdify(var, Abs(p_pdf - q_pdf), 'numpy') # sympy's symbolic integrate struggled to close-form this, so integrate numerically instead
+    result, _ = quad(integrand, -np.inf, np.inf)
+    return result
 
 X, Y = Die('X', 6), Die('Y', 6) # Define two six sided dice
 Z = Normal('Z', 0, 1) # Declare a Normal random variable with mean 0, std 1
@@ -67,4 +73,7 @@ print(variance(X+Y)) # Variance of the sum of two dice
 
 print(simplify(P(Z>1))) # Probability of Z being greater than 1
 
-print(simplify(l1_distance(X, Z)))
+W = Normal('W', 1, 1) # A second Normal, shifted in mean, to compare against Z
+print(l1_distance(Z, W)) # L1 distance between the two Normal densities
+
+print(l1_distance(Z, X))
